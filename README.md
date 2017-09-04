@@ -1,4 +1,4 @@
-# Notes on "Functional Programming in Scala"
+# Notes on "Functional Programming Principles in Scala"
 
 ## Overview
 These are the notes I took while participating Martin Odersky's Coursera course "Functional Programming in Scala". This course can be found at https://www.coursera.org/learn/progfun1/.
