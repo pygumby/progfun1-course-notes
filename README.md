@@ -1,7 +1,7 @@
 # Notes on "Functional Programming Principles in Scala"
 
 ## Overview
-These are the notes I took while participating Martin Odersky's Coursera course "Functional Programming in Scala". This course can be found at https://www.coursera.org/learn/progfun1/.
+These are the notes I took while participating Martin Odersky's Coursera course "Functional Programming Principles in Scala". This course can be found at https://www.coursera.org/learn/progfun1/.
 
 ## Credit
 All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@odersky](https://github.com/odersky)).
@@ -257,4 +257,41 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   }
   ````
 
-  ​
+### Lecture 2.1 -- Higher-Order Functions
+
++ Functional programming languages treat functions as "first-class values". This means that they can be received as arguments and returned as results. "Higher-order functions" are functions that do just that.
+
++ `sum` is an example of a function that takes another function as an argument.
+
+  ````scala
+  def sum(f: Int => Int, a: Int, b: Int): Int =
+    if (a > b) 0
+    else f(a) + sum(f, a + 1, b)
+
+  def sumInts(a: Int, b: Int) =       sum(id, a, b)
+  def sumCubes(a: Int, b: Int) =      sum(cube, a, b)
+  def sumFactorials(a: Int, b: Int) = sum(fact, a, b)
+
+  def id(x: Int): Int = x
+  def cube(x: Int): Int = x * x * x
+  def fact(x: Int): Int = if (x == 0) 1 else fact(x - 1)
+  ````
+
++ `A => B` denotes the type of a function that has a parameter of type `A` and returns a `B`. Therefore, the type of `sum` is `Int => Int`.
+
++ As it is sometimes tedious to define and name functions using `def`, we would like to write them like literals -- without giving them a name. Anonymous functions enable this. Here is an example:
+
+  ````scala
+  (x: Int, y: Int) => x + y
+  ````
+
+  The type of a parameter can be omitted if it is inferred by the compiler.
+
++ An anonymous function `(x1: T1, ..., xn: Tn) => E` can always be expressed as `def f(x1: T1, ..., xn ... Tn) = E; f`. Therefore, anonymous functions are said to be syntactic sugar.
+
++ `sumInts` and `sumCubes` can be shortened using anonymous functions:
+
+  ````scala
+  def sumInts(a: Int, b: Int)  = sum(x => x, a, b)
+  def sumCubes(a: Int, b: Int) = sum(x => x * x *x, a, b)
+  ````
