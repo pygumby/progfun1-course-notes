@@ -257,6 +257,8 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   }
   ````
 
+## Week 2 -- Higher-Order Functions 
+
 ### Lecture 2.1 -- Higher-Order Functions
 
 + Functional programming languages treat functions as "first-class values". This means that they can be received as arguments and returned as results. "Higher-order functions" are functions that do just that.
@@ -293,5 +295,52 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 
   ````scala
   def sumInts(a: Int, b: Int)  = sum(x => x, a, b)
-  def sumCubes(a: Int, b: Int) = sum(x => x * x *x, a, b)
+  def sumCubes(a: Int, b: Int) = sum(x => x * x * x, a, b)
+  ````
+
+### Lecture 2.2 -- Currying
+
++ Note that above, `sumInts` and `sumCubes` simply pass `a` and `b` through. We can do better:
+
+  ````scala
+  def sum(f: Int => Int): (a: Int, b: Int) => Int = {
+    def sumF(a: Int, b: Int): Int = 
+      if (a > b) 0
+      else f(a) + sumF(a + 1, b)
+    sumF
+  }
+
+  def sumInts  = sum(x => x)         // Exemplary application: sumInts(1, 10)
+  def sumCubes = sum(x => x * x * x)
+  ````
+
+  `sum` is now a function that returns another function.
+
++ The "middlemen" `sumInts` and `sumCubes` can be avoided. We can simply call `sum(cube)(1, 10)`, where `sum(cube)` returns the sum of cubes function and is therefore equivalent to `sumCubes`. Then the resulting function is applied to `(1, 10)`.
+
++ Function application associates to the left.
+
+  ````scala
+  // sum(cube)(1, 10) == (sum(cube))(1, 10)
+  ````
+
++ This way of defining functions is so useful, it got its own syntax in Scala. The following definitions of `sum` is equivalent to the previous one using `sumF`:
+
+  ````scala
+  def sum(f: Int => Int)(a: Int, b: Int): Int = 
+    if (a > b) 0 else f(a) + sum(f)(a + 1, b)
+  ````
+
++ The expansion of multiple parameter lists is formalized like this: A function `def f(args1)...(argsn) = E` is equivalent to a function `def f(args1)...(argsn-1) = { def g(argsn) = E; g }`, or, for short, `def f(args1)...(argsn-1) = (argsn) => E`.
+
++ By repeating the process n times, `def f(args1)...(argsn-1)(argsn) = E` is shown to be equivalent to `def f = (args1 => (args2 => ... (argsn => E) ... ))`.
+
++ This style of function definition and applications is called "currying", named after the logician Haskell Brooks Curry.
+
++ The type of `def sum(f: Int => Int)(a: Int, b: Int): Int = ...` is `(Int => Int) => (Int, Int) => Int`.
+
++ Function types associate to the right.
+
+  ````scala
+  // Int => Int => Int == Int => (Int => Int)
   ````
