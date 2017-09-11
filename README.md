@@ -344,3 +344,87 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   ````scala
   // Int => Int => Int == Int => (Int => Int)
   ````
+
+### Lecture 2.3 -- Example: Finding Fixed Points
+
++ A number is called a fixed point of a function `f` if `f(x) = x`.  For example, `2` is a fixed point of `x => 1 + (x / 2)^2` as `1 + (2 / 2)^2` is `2`.
+
++ For some functions `f`, we can locate fixed points by starting with an initial estimate `x` (e.g., `1`) and then repeatedly applying `f` to it until the results do not vary anymore. This works for the previously mentioned function.
+
+  ````scala
+  // x, f(x), f(f(x)), ...
+  ````
+
++ This leads to this function for finding a function's fixed point:
+
+  ````scala
+  val tolerance = 0.0001
+  def isCloseEnough(x: Double, y: Double) =
+    abs((x - y) / x) / x < tolerance
+  def fixedPoint(f: Double => Double)(firstGuess: Double) = {
+    def iterate(guess: Double): Double = {
+      val next = f(guess)
+      if (isCloseEnough(guess, next)) next
+      else iterate(next)
+    }
+    iterate(firstGuess)
+  }
+  ````
+
++ Here is a specification of the `sqrt` function: 
+
+  + `sqrt(x)` = the number `y` so that `y * y = x`
+  + By dividing both sides of `y * y = x` with `y`, we get `y = x / y`.
+  + Therefore, for a given `x`, `sqrt(x)` is a fixed point of a function `y => x / y`.
+    + Another way to look at it: Dividing a number by its square root results in its square root again. Example: Let `x` be `9`. Applying `sqrt(9)`, i.e., `3`, to `y => 9 / y` results in `sqrt(9)` again.
+
+
+
++ Can we calculate `sqrt(x)` by iterating towards a fixed point of `y => x / y`?
+
+  ````scala
+  def sqrt(x: Double) =
+    fixedPoint(y => x / y)(1.0)
+  ````
+
+  Unfortunately, no. When adding `println(next)` after the line `val next = // ... ` in the body of the `iterate` function, `sqrt(2)` prints :
+
+  ````scala
+  // 2.0
+  // 1.0
+  // 2.0
+  //...
+  ````
+
+  + This can easily be reproduced using pen and paper.
+
++ These oscillation can be avoided by averaging successive values:
+
+  ````scala
+  def sqrt(x: Double) =
+    fixedPoint(y => (y + x / y) / 2)(1.0)
+  ````
+
+  `sqrt(2)` now prints:
+
+  `````scala
+  // 1.5
+  // 1.4166666666666665
+  // 1.4142156862745097
+  `````
+
+  + The function `y => (y + x / y) / 2` still has the property that for a given `x`, `sqrt(x)` is a fixed point of it. Example: Let `x` be `9`. Applying `sqrt(9)` , i.e., `3`, to `y => (y + 9 / y) / 2` results in `sqrt(9)` again.
+
++ This technique of stabilizing by averaging can be factored out into its own function:
+
+  ````scala
+  def averageDamp(f: Double => Double)(x: Double) = 
+    (x + f(x)) / 2
+  ````
+
+  `sqrt` can then be defined as follows:
+
+  ````scala
+  def sqrt(x: Double) =
+    fixedPoint(averageDamp(y => x / y))(1.0)
+  ````
