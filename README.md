@@ -320,8 +320,8 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 
 + Function application associates to the left.
 
-  ````scala
-  // sum(cube)(1, 10) == (sum(cube))(1, 10)
+  ````
+  sum(cube)(1, 10) == (sum(cube))(1, 10)
   ````
 
 + This way of defining functions is so useful, it got its own syntax in Scala. The following definitions of `sum` is equivalent to the previous one using `sumF`:
@@ -351,8 +351,8 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 
 + For some functions `f`, we can locate fixed points by starting with an initial estimate `x` (e.g., `1`) and then repeatedly applying `f` to it until the results do not vary anymore. This works for the previously mentioned function.
 
-  ````scala
-  // x, f(x), f(f(x)), ...
+  ````
+  x, f(x), f(f(x)), ...
   ````
 
 + This leads to this function for finding a function's fixed point:
@@ -389,11 +389,11 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 
   Unfortunately, no. When adding `println(next)` after the line `val next = // ... ` in the body of the `iterate` function, `sqrt(2)` prints :
 
-  ````scala
-  // 2.0
-  // 1.0
-  // 2.0
-  //...
+  ````
+  2.0
+  1.0
+  2.0
+  ...
   ````
 
   + This can easily be reproduced using pen and paper.
@@ -407,10 +407,10 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 
   `sqrt(2)` now prints:
 
-  `````scala
-  // 1.5
-  // 1.4166666666666665
-  // 1.4142156862745097
+  `````
+  1.5
+  1.4166666666666665
+  1.4142156862745097
   `````
 
   + The function `y => (y + x / y) / 2` still has the property that for a given `x`, `sqrt(x)` is a fixed point of it. Example: Let `x` be `9`. Applying `sqrt(9)` , i.e., `3`, to `y => (y + 9 / y) / 2` results in `sqrt(9)` again.
@@ -428,3 +428,75 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   def sqrt(x: Double) =
     fixedPoint(averageDamp(y => x / y))(1.0)
   ````
+
+### Lecture 2.4 -- Scala Syntax Summary
+
++ In the following, the context-free syntax of the language elements seen so far are given in Extended Backus-Naur form (EBNF), where
+
+  + `|` denotes an alternative,
+  + `[...]` and option (0 or 1),
+  + `{...}` a repetition (0 or more).
+
++ Types:
+
+  ````
+  Type         = SimpleType | FunctionType
+  FunctionType = SimpleType '=>' Type
+               | '(' [Types] ')' '=>' Type
+  SimpleType   = Ident
+  Types        = Type {',' Type}
+  ````
+
+  A type can be:
+
+  + A numeric type, e.g., `Int`, `Double`
+  + The `Boolean` type
+  + The `String` type
+  + A function type, e.g., `Int => Int`, `(Int, Int) => Int`
+
++ Expressions:
+
+  ````
+  Expr         = InfixExpr | FunctionExpr
+               | if '(' Expr ')' Expr else
+  InfixExpr    = PrefixExpr | InfixExpr Operator InfixExpr
+  Operator     = ident
+  PrefixExpr   = ['+', '-', '!', '~'] SimpleExpr
+  SimpleExpr   = ident | literal | SimpleExpr '.' ident | Block
+  FunctionExpr = Bindings '=>' Expr
+  Bindings     = ident [':' SimpleType]
+               | '(' [Binding {',' Binding}] ')'
+  Binding      = ident [':' Type]
+  Block        = '{' { Def ';' } Expr '}'
+  ````
+
+  An expression can be:
+
+  + An identifier, e.g., `x`,  `isGoodEnough`
+  + A literal, e.g., `0`, `"abc"`
+  + A function application, e.g., `sqrt(x)`
+  + An operator application, e.g., `-x`, `y + x`
+  + A selection, e.g., `math.abs`
+  + A conditional expression, e.g., `if (x < 0) -x else x`
+  + A block, e.g., `{ val x = math.abs(y); x * 2 }`
+  + An anonymous function, e.g., `x => x + 1`
+
++ Definitions:
+
+  ````
+  Def        = FunDef | ValDef
+  FunDef     = def ident { '(' [ Parameters ] ')' } [':' Type] '=' Expr
+  ValDef     = val ident [ ':' Type ] '=' Expr
+  Parameter  = ident ':' [ '=>' ] Type
+  Parameters = Parameter { ',' Parameter }
+  ````
+
+  A definition can be:
+
+  + A function definition, e.g., `def square(x: Int) = x * x`
+  + A value definition, e.g., `val y = square(2)`
+
+  A parameter can be:
+
+  + A call-by-value parameter, e.g., `(x: Int)`
+  + A call-by-name parameter, e.g., `(y: => Double)`
