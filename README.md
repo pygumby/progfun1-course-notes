@@ -500,3 +500,57 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 
   + A call-by-value parameter, e.g., `(x: Int)`
   + A call-by-name parameter, e.g., `(y: => Double)`
+
+### Lecture 2.5 -- Functions and Data
+
++ In this section, we design a package for doing rational arithmetic. A rational number `x / y` is represented by its numerator `x` and its denominator `y` (both integers).
+
++ We define the following class `Rational` , introducing two entities, i.e., a new type `Rational` and a constructor `Rational`. Even tough they have the same name, there is no conflict, as Scala keeps the names of types and value in different namespaces.
+
++ Instances of a class are called objects. They are created by prefixing the application of the constructor with `new `. Their two members `numer` and `denom` are selected using an infix operator.
+
+  ````scala
+  val x = new Rational(1, 2)
+  x.numer
+  ````
+
++ In a first approach, arithmetic functions implementing standard rules are implemented as
+
+  top-level functions that take and return `Rational`s, e.g.:
+
+  ````scala
+  def addRational(r: Rational, s: Rational): Rational = // ...
+  ````
+
++ Then, the functions operating on the data abstraction are packaged in the abstraction itself -- as methods:
+
+  ````scala
+  class Rational(x: Int, y: Int) {
+    def numer = x
+    def denom = y
+    
+    def add(that: Rational) =
+      new Rational(
+        numer * that.denom +  that.numer * denom,
+        denom * that.denom)
+    
+    def neg =
+      new Rational(-numer, denom)
+    
+    def sub(that: Rational) =
+      add(that.neg)
+    
+    override def toString =
+      numer + "/" + denom
+  }
+
+  val x = new Rational(1, 3)
+  val y = new Rational(5, 7)
+  val z = new Rational(3, 2)
+  x.numer // 1
+  x.denom // 3
+  x.add(y) // 22/1
+  println(x.sub(y).sub(z)) // -79/42
+  ````
+
+  ​
