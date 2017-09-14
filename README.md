@@ -553,4 +553,85 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   println(x.sub(y).sub(z)) // -79/42
   ````
 
-  ​
+### Lecture 2.6 -- More Fun with Rationals
+
++ In the previous lecture, rationals have not always been represented in their simplest form. They can be reduced to their smallest numerator and denominator by dividing both with their greatest common divisor.
+
++ In order to adhere to the DIY ("Don't repeat yourself!") principle, we do not implement this in each operation but in the constructor. Three ways of doing so are shown. However, clients of the `Rational` class always experience the same behavior.
+
+  ````scala
+  // Approach 1
+  // `gcd` is calculated immediately, its value can be re-used by `numer` and `denom`.
+  class Rational(x: Int, y: Int) {
+    // `private` members can only be accessed from inside the class
+    private def gcd(a: Int, b: Int): Int =
+      if (b == 0) a else gcd(b, a % b)
+    private val g = gcd(x, y)
+    def numer = x / g
+    def denom = y / g
+    // ...
+  }
+
+  // Approach 2
+  // This can be advantageous if `numer` and `denom` are called infrequently.
+  class Rational(x: Int, y: Int) {
+    private def gcd(a: Int, b: Int): Int =
+      if (b == 0) a else gcd(b, a % b)
+    def numer = x / gcd(x, y)
+    def denom = y / gcd(x, y)
+    // ...
+  }
+
+  // Appraoch 3
+  // This can be advantageous if `numer` and `denom` are called often.
+  class Rational(x: Int, y: Int) {
+    private def gcd(a: Int, b: Int): Int =
+      if (b == 0) a else gcd(b, a % b)
+    // As `val`s, `numer` and `denom` are computed only once.
+    val numer = x / gcd(x, y)
+    val denom = y / gcd(x, y)
+    // ...
+  }
+  ````
+
++ The ability to choose from different implementations without affecting clients is called data abstraction.
+
++ Inside a class, there is the self reference `this`, which represents the object on which a method is executed. A simple name `x`, referring to a class member, is an abbreviation of `x`.  `this` is used to implement the member functions `less` and `max` on the function `Rational`.
+
+  ````scala
+  class Rational(x: Int, y: Int) {
+    // ...
+    def less(that: Rational) =
+      numer * that.denom < that.numer * denom
+    
+    def max(that: Rational) =
+      if (this.less(that)) that else this
+  }
+  ````
+
++ The `Rational` class requires `denom` to be positive. This can be enforced like so:
+
+  ````scala
+  class Rational(x: Int, y: Int) {
+    require(y > 0, ”denominator must be positive”)
+    // ...
+  }
+  ````
+
++ The predefined function `require` takes a condition and an optional message string. If the condition is `false`, an `IllegalArgumentException` is thrown. There is also `assert`, which takes the same arguments as `require`, but throws an `AssertionError` whenever the condition is `false`. The two differ in intent:
+
+  + `require` is used to enforce a requirement on the function caller.
+  + `assert` is used to check the code of the function itself.
+
++ Scala introduces the primary constructor of the class implicitly. It takes the parameters of the class (`class Rational(x: Int, y: Int)`) and executes the statements in the class body, e.g., `require(y > 0, ”denominator must be positive”)`.
+
++ Auxiliary constructors may be declared. They are called `this`.
+
+  ````scala
+  class Rational(x: Int, y: Int) {
+    def this(x: Int) = this(x, 1)
+    // ...
+  }
+  ````
+
++ It would be a bad idea if we altered `Rational` so that numbers are kept unsimplified until they are printed, i.e., if we moved the simplification inside the `toString` method. Why? We are dealing with integers here, and we might exceed the maximal number.
