@@ -635,3 +635,109 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   ````
 
 + It would be a bad idea if we altered `Rational` so that numbers are kept unsimplified until they are printed, i.e., if we moved the simplification inside the `toString` method. Why? We are dealing with integers here, and we might exceed the maximal number.
+
+### Lecture 2.7 -- Evaluation and Operators
+
++  The previously introduced model of evaluation based on the term of rewriting, the so-called substitution model can be extended to model classes and objects. Consider the following class definition:
+
+  ````scala
+  // The list of function parameters is optional.
+  // Also, parameter types are left out for brevity.
+  class C(x1, ..., xm) { ... def f(y1, ..., yn) = b ... }
+  ````
+
+  How is the following expression evaluated?
+
+  ````scala
+  new C(v1, ..., vm).f(w1, ..., wn)
+  ````
+
+  Inside the function's body,
+
+  + `f`'s parameters `y1, ..., yn` are substituted by the arguments `w1, ..., wn`,
+  + `f`'s parameters `v1, ..., vn ` are substituted by the arguments `w1, ..., wn`, and
+  + the self reference `this` is substituted by the value of the object `new C(v1, ..., vn)`:
+
+  ````
+     new C(v1, ..., vm).f(w1, ..., wn)
+  -> [w1/y1, ..., wn/yn][v1/x1, ..., vm/xm][new C(v1, ..., vm)/this]
+     b
+  =  b
+  ````
+
++ Two more object rewriting examples are given:
+
+  `````
+     new Rational(1, 2).numer
+  -> [1/x, 2/y][][new Rational(1, 2)/this]
+     x
+  =  1
+
+     new Rational(1, 2).less(new Rational(2, 3))
+  -> [1/x, 2/y][new Rational(2, 3)/that][new Rational(1, 2)/this]
+     this.numer * that.denom < that.numer * this.denom
+  =  new Rational(1, 2).numer * new Rational(2, 3).denom <
+     new Rational(2, 3).numer * new Rational(1, 2).denom
+  // ...
+  =  1 * 3 < 2 * 2
+  =  true
+  `````
+
++ With integers, we can write `x + y`, however, with `Rational`s we must do `r.add(s)`. In Scala, we can eliminate using
+
+  1. Infix notation
+  2. Relaxed identifiers
+
++ Using infix notation, we can write `r add s` instead of `r.add(s)`. Any method with one parameter can be used like an infix operator.
+
++ In Scala, an identifier are not confined to being alphanumeric. Instead, they can be
+
+  + Alphanumeric: Starting with a letter, followed by a sequence of letters or numbers. (`_` counts as a letter in this definition.)
+  + Symbolic: Starting with an operator symbol, e.g., `+` or `-`, followed by other operator symbols.
+  + Alphanumeric identifiers can also end in an underscore, followed by some operator symbols.
+
++ Using infix notation and relaxed identifiers, we can define the class `Rational` more naturally:
+
+  `````scala
+  class Rational(x: Int, y: Int) {
+    // ...
+    
+    def <(that: Rational) =
+      numer * that.denom < that.numer * denom
+    
+    def max(that: Rational) =
+      if (this < that) that else this
+    
+    def +(r: Rational) =
+      new Rational(
+        numer * r.denom + r.numer * denom,
+        denom * r.denom)
+    
+    def unary_- : Rational = 
+      new Rational(-numer, denom)
+    
+    def -(that: Rational) = 
+      this + -that
+  }
+
+  val x = new Rational(1, 2)
+  val y = new Rational(1, 3)
+  x * x + y * y // (x * x) + (y * y)
+  `````
+
++ The precedence of an operator is determined by its first character. Here is a list of the characters in increasing order of precedence:
+
+  ````
+  (all letters)
+  |
+  ^
+  &
+  < >
+  = !
+  :
+  + -
+  * / %
+  (all other special characters)
+  ````
+
++ A parenthesized version of `a + b ^? c ?^ d less a ==> b | c` would be `((a + b) ^? (c ?^ d)) less ((a ==> b) | c)`.
