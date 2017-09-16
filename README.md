@@ -923,5 +923,76 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   + It can be used to signal abnormal termination. (An example follows when exceptions are covered.)
   + It can be used as an element type of empty collections, e.g., `Set[Nothing]`.
 + The `Null` type subclasses every class that inherits from `Object`. The type of `null` is `Null`. Every reference class type has a value `null`.
-+ Exceptions is Scala are similar to exceptions in Java. The expression `throw Excp` aborts the evaluation with the exception `Exc`. The type of this expression is `Nothing`.
++ Exceptions is Scala are similar to exceptions in Java. The expression `throw Exc` aborts the evaluation with the exception `Exc`. The type of this expression is `Nothing`.
 + The type of  `if (true) 1 else false` is `AnyVal`, as `1` is an `Int`, `false` is a `Boolean` and `AnyVal` happens to be the closest `AnyVal` of the two.
+
+### Lecture 3.3 -- Polymorphism
+
++ The immutable linked list is a fundamental data structure in many functional programming languages. Such a list is either a `Nil` or a `Cons`. `Nil` represents an empty list, whereas `Cons` holds an element `head` as well as a pointer to the rest of the list `tail`.
+
++ At first, an implementation of an `IntList`, i.e., a definition of lists with integers, is given. By this example, the concept of value parameters is explained, which is about defining parameters and fields of a class at the same time.
+
+  ````scala
+  // Given...
+  trait IntList
+  // ...then the following...
+  class Cons(val head: Int, val tail: IntList) extends IntList
+  // ...is equalvalent to...
+  class Cons(_head: Int, _tail: IntList) extends IntList {
+    val head = _head
+    val tail = _tail
+  }
+  // ...where `_head` and `_tail` are otherwise unused names. 
+  ````
+
++ `IntList` does not scale, as we'd need `DoubleList`, and so on. Therefore, a generalized definition that makes use of type parameters is given:
+
+  ````scala
+  trait List[T] {
+    def isEmpty: Boolean
+    def head: T
+    def tail: List[T]
+  }
+
+  class Cons[T](val head: T, val tail: List[T]) extends List[T] {
+    def isEmpty = false
+  }
+
+  class Nil[T] extends List[T] {
+    def isEmpty: Boolean = true
+    def head: Nothing = throw new NoSuchElementException("Nil.head")
+    def tail: List[T] = throw new NoSuchElementException("Nil.tail")
+  }
+
+  ````
+
+  Type parameters are written in square brackets, e.g., `[T]`.
+
++ In order to demonstrate that functions can have type parameters, too, here is a function that creates `List`s containing one element of type `T`:
+
+  ````scala
+  def singleton[T](elem: T) = new Cons[T](elem, new Nil[T])
+
+  singleton[Int](1) // new Cons[Int](1, new Nil[Int])
+  singleton[Boolean](true) // new Cons[Boolean](true, new Nil[Boolean])
+  ````
+
++ The Scala compiler can oftentimes deduce the correct type parameters from the provided value arguments. Thus, they can be omitted in a lot of cases. E.g., `singleton(1)` can be written instead of `singleton[Int](1)`.
+
++ Type parameters (and arguments) do not affect evaluation in Scala. In terms of our substitution model, we can assume that all types are removed before evaluating a program. Types are only important for the compiler. Languages that also do type erasure include Java, Scala, and Haskell, whereas C++, C# and F# keep them at run time.
+
++ Polymorphism is a Greek word with the original meaning of "having many forms". Applied to a function, it means that this function can be applied to arguments of many types. Applies to a type, it means that the type can have instances of many types. In this course, polymorhism has been seen in two forms:
+
+  + Subtyping: Wherever there is a parameter that accepts a base class instance, a subclass instance can be passed.
+  + Generics: Many instances of a function or class can be created using type parameterization, e.g., `List[Int]` or `List[String]`.
+
++ A function `nth` selecting the `n`th integer of a given list might look like this:
+
+  ````scala
+  def nth[T](n: Int, xs: List[T]): T =
+    if (xs.isEmpty) throw new IndexOutOfBoundsException
+    else if (n == 0) xs.head
+    else nth(n - 1, xs.tail)
+  ````
+
+  The first list element has the number 0. If `n` is outside the range from 0 until length of the list minus one, an `IndexOutOfBoundsException` is thrown.
