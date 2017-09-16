@@ -741,3 +741,125 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   ````
 
 + A parenthesized version of `a + b ^? c ?^ d less a ==> b | c` would be `((a + b) ^? (c ?^ d)) less ((a ==> b) | c)`.
+
+## Week 3 -- Data and Abstraction
+
+### Lecture 3.1 -- Class Hierarchies
+
++ Abstract classes contain members that are yet to be implemented. Accordingly, they cannot be instantiated. `IntSet` is an example of an abstract class:
+
+  ````scala
+  abstract class IntSet {
+    def contains(x: Int): Boolean
+    def incl(x: Int): IntSet
+  }
+  ````
+
++ Here is an implementation of `IntSet` in terms of binary trees:
+
+  ````scala
+  class Empty extends IntSet {
+    def contains(x: Int): Boolean = false
+    def incl(x: Int): IntSet = new NonEmpty(x, new Empty, new Empty)
+  }
+
+  class NonEmpty(elem: Int, left: IntSet, right: IntSet) extends IntSet {
+    def contains(x: Int): Boolean =
+      if (x < elem) left contains x
+      else if (x > elem) right contains x
+      else true
+
+    def incl(x: Int): IntSet =
+      if (x < elem) new NonEmpty(elem, left incl x, right)
+      else if (x > elem) new NonEmpty(elem, left, right incl x)
+      else this
+  }
+  ````
+
+   + This is still a purely functional approach, there is no mutation going on. We never "change" the data structure, we always return a new one.
+   + Data structures like this are called persistent data structures, since when we do "changes", e.g., by calling `incl`, the old version of the data structure is still maintained, i.e., it is not discarded.
+      + Example: Let `x` be a `NonEmpty` node. If we call `incl` on it with an element that is smaller than the element `x` is carrying, the new `NonEmpty` node resulting from this call will reference  `x`'s right-hand side, i.e., `x`'s `right`. Parts of `x`'s left-hand side may also stay referenced. This can easily be reproduced using pen and paper.
+
++ Terminology
+
+  + `Empty` and `NonEmpty` extend `IntSet`. As such, they conform to the `IntSet` type and can be used wherever an `IntSet` is required.
+  + `IntSet` is the superclass of `Empty` and `NonEmpty`.
+  + `Empty` and `NonEmpty` are subclasses of `IntSet`.
+  + In Scala, any user-defined class extends another class, if no superclass is provided, the class in question simply extends `java.lang.Object`.
+  + The base classes of a class are all direct or indirect superclasses of that class. E.g., `Empty`'s base classes are `IntSet` and `java.lang.Object`.
+  + `incl` and `contains` in `Empty` and `NonEmpty` implement the respective abstract functions in `InSet`.
+  + A class may redefine a non-abstract function of its superclass by prefixing its definition with the keyword `override`, e.g., `override def foo = 2`. Using `override` here is not optional, it is, however, optional and mostly omitted when implementing an abstract function. 
+
++ As it can be argued that there really is one single `Empty` node, it can be replaced by a singleton object. Singleton objects cannot be created. Behind the scenes, one instance is being created once it is first referenced. Singletons are values and evaluate to themselves.
+
+  ````scala
+  object Empty extends IntSet {
+    def contains(x: Int): Boolean = false
+    def incl(x: Int): IntSet =
+      new NonEmpty(x, Empty, Empty) // It does not say `new Empty` anymore but `Empty`.
+  }
+  ````
+
++ Standalone Scala programs (as opposed to worksheets or the REPL) need to have a `main` method inside an object.
+
+  ````scala
+  object Hello {
+    def main(args: Array[String]) =
+      println("Hello, world.")
+  }
+  ````
+
++ What would a method `def union(other: IntSet): IntSet` look like?
+
+  + For `Empty`, it would be `other`, as the union of an empty set with another set always results in the other set.
+  + For `NonEmpty`, it would be `((left union right) union other) incl elem`? How can we know this actually terminates? Well, the first recursive call, `left union right`, is on `left`. Thus, the first recursive call is on something smaller than what we started with, `this`, and has to eventually reach the base case defined in `Empty`. The same goes for the second recursive call, `(left union right) union other`, which is on the union of `left` and `right`, which, in turn, is still smaller than `this`, as it doesn't contain `elem`. Therefore, the base case will eventually be reached, too.
+
++ Scala implements dynamic binding/dynamic method dispatch. Thus, whenever an overridden method is called through a superclass reference, e.g., `val s: IntSet = Empty; s.incl(42)`, which version of the method to execute is made based on the runtime type of the object that contains it. Thus, at run time, `Empty`'s implementation is chosen -- not `IntSet`'s (if it had one).
+
++ Here two examples of how dynamic binding evaluates:
+
+  ````
+     Emtpy contains 1
+  -> [1/x][Empty/this]
+     false
+  =  false
+
+     (new NonEmpty(7, Empty, Empty)) contains 7
+  -> [7/elem][7/x][new NonEmpty(7, Empty, Empty)/this]
+     if (x < elem) this.left contains x
+     else if (x > elem) this.right contains x
+     else true
+  =  if (7 < 7) new NonEmpty(7, Empty, Empty).left contains 7
+     else if (7 > 7) new NonEmpty(7, Empty, Empty).right contains 7
+     else true
+  =  true
+  ````
+
++ Can we implement higher-order functions in terms of objects? Obviously. Here is my shot at it:
+
+  ````scala
+  trait Function[-Param, +Return] {
+    def apply(param: Param): Return
+  }
+
+  // `f1` demonstrates why covariance and contravariance are necessary.
+  val f1: Function[String, Any] = new Function[Any, String] {
+    override def apply(param: Any) =
+      param.toString
+  }
+
+  assert(f1.apply("Hello, world.") == "Hello, world.")
+
+  // `f2` demonstrates how `Function` objects can represent higher-order functions.
+  val f2: Function[Int, Function[Int, Int]] = new Function[Int, Function[Int, Int]] {
+    override def apply(outer: Int) =
+      new Function[Int, Int] {
+        override def apply(inner: Int) =
+          inner + outer
+      }
+  }
+
+  assert(f2.apply(2).apply(40) == 42)
+  ````
+
++ Can We implement objects is terms of higher-order functions. I'll delegate to the following blog post, which argues that objects and closures are equivalent: http://c2.com/cgi/wiki?ClosuresAndObjectsAreEquivalent
