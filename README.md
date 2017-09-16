@@ -863,3 +863,65 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   ````
 
 + Can We implement objects is terms of higher-order functions. I'll delegate to the following blog post, which argues that objects and closures are equivalent: http://c2.com/cgi/wiki?ClosuresAndObjectsAreEquivalent
+
+### Lecture 3.2 -- How Classes are Organized
+
++  Classes and objects are organized in packages. To do so, a package clause can be placed at the top of a source file.
+
+  ````scala
+  package progfun.examples
+  object Hello {}
+  ````
+
+  `Hello`'s fully qualified name is `progfun.examples.Hello`.
+
++ A class `Rational` in package `week3` can be used via its fully qualified name, e.g., `new week3.Rational(1, 2)`. Alternatively, imports can be used.
+
+  ````scala
+  // Named imports
+  import week3.Rational          // Imports just `Rational`
+  import week3.{Rational, Hello} // Imports both `Rational` and `Hello`
+  // Wildcard import
+  import week3._                 // Imports everything in package `week3`
+  ````
+
+  One can import from packages and (singleton) objects.
+
+
++ Some entities are imported automatically into any Scala program.
+
+  + All members of package `scala`, e.g., `Int`.
+  + All members of package  `java.lang`, e.g., `Object`.
+  + All members of the singleton object `scala.Predef`, e.g. `assert`.
+
++ Scala's standard library can be explored using the scaladoc pages: http://www.scala-lang.org/files/archive/api/current/
+
++ Just like in Java, classes may only inherit from one superclass. To inherit from arbitrarily many superclasses ("single inheritance language"), one can use traits.
+
+  ````scala
+  trait Planar {
+    def height: Int
+    def width: Int
+    def surface = height * width
+  }
+
+  class Square extends Shape with Planar with Movable // ...
+  ````
+
+
+  Traits resemble Java's interfaces. They are, however, more powerful, as they can also contain fields and concrete methods. Unlike classes, traits cannot have (value) parameters.
+
++ The remainder of this lecture is devoted to Scala' class hierarchy.![Scala Class Hierarchy](scala_class_hierarchy.png)
++ Top types
+
+  + `Any` is the base type of all types, and conceptually defines certain universal methods, e.g., `==`, `!=`, `equals`, `hashCode`, `toString`. (`==` is essentially just a forwarder that calls the Java `equals` method.)
+
+  + `AnyVal` is the base type of all primitive types.
+
+  + `AnyRef` is the base type of all reference types. It is an alias of `java.lang.Object`.
++ The `Nothing` type is at the bottom of the type hierarchy. It subclasses every other type. There is no value of type `Nothing`. What is it useful for?
+  + It can be used to signal abnormal termination. (An example follows when exceptions are covered.)
+  + It can be used as an element type of empty collections, e.g., `Set[Nothing]`.
++ The `Null` type subclasses every class that inherits from `Object`. The type of `null` is `Null`. Every reference class type has a value `null`.
++ Exceptions is Scala are similar to exceptions in Java. The expression `throw Excp` aborts the evaluation with the exception `Exc`. The type of this expression is `Nothing`.
++ The type of  `if (true) 1 else false` is `AnyVal`, as `1` is an `Int`, `false` is a `Boolean` and `AnyVal` happens to be the closest `AnyVal` of the two.
