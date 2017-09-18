@@ -996,3 +996,73 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   ````
 
   The first list element has the number 0. If `n` is outside the range from 0 until length of the list minus one, an `IndexOutOfBoundsException` is thrown.
+
+## Week 4 -- Types and Pattern Matching
+
+### Lecture 4.1 -- Objects Everywhere
+
++ In a pure object-oriented programming language, each value is an object. If this language is based on classes, the type of each value, i.e., object, would be a class.
+
+  + In Scala, there are not just reference types but also primitive types and functions. Does this mean Scala is not purely object-oriented?
+    + Conceptually, primitive types, e.g., `Int`, do not receive any special treatment and are used like other classes. The fact that, under the hood, `Int`s are represented as 32-bit integers, can be regarded as a mere optimization.
+    + Functions are actually represented by classes, too, just like I have demonstrated at the end of lecture 3.2.
+
++ Scala's `Boolean` type maps to the JVM's primitive type `boolean`, however, one could easily implement a purely object-oriented `Boolean`  type from scratch.
+
+  ````scala
+  abstract class Boolean {
+    def ifThenElse[T](thenExpr: => T, elseExpr: T): T
+
+    def && (x: => Boolean): Boolean = ifThenElse(x, False)
+    def || (x: => Boolean): Boolean = ifThenElse(True, x)
+    def unary_! : Boolean           = ifThenElse(False, True)
+
+    def == (x: Boolean): Boolean    = ifThenElse(x, !x)
+    def != (x: Boolean): Boolean    = ifThenElse(!x, x)
+
+    // In the following, we assume `False` < `True`:
+    def < (x: Boolean): Boolean     = ifThenElse(False, x)
+  }
+
+  object True extends Boolean {
+    def ifThenElse[T](thenExpr: => T, elseExpr: T): T =
+      thenExpr
+  }
+
+  object False extends Boolean {
+    def ifThenElse[T](thenExpr: => T, elseExpr: T): T =
+      elseExpr
+  }
+
+  val x: Boolean = True || False
+  val y: Boolean = !x == x
+  val z: AnyVal = y.ifThenElse(84 / 2, false)
+  ````
+
++ Analogously, a partial specification of such a class `Int` is given (but omitted here for brevity). While the operations on `Int`s are expressed as methods, the question is asked whether we can actually implement this class solely based on objects, i.e., not resorting back to primitive `int`s.
+
++ Regarding the previous question, a class `Nat` representing non-negative integers is implemented:
+
+  ````scala
+  abstract class Nat {
+    def isZero: Boolean
+    def predecessor: Nat
+    def successor: Nat = new Succ(this)
+    def +(that: Nat): Nat
+    def -(that: Nat): Nat
+  }
+
+  object Zero extends Nat {
+    def isZero = true
+    def predecessor = throw new Error("Zero.predecessor")
+    def +(that: Nat) = that
+    def -(that: Nat) = if (that.isZero) this else throw new Error("Negative number")
+  }
+
+  class Succ(n: Nat) extends Nat {
+    def isZero = false
+    def predecessor = n
+    def +(that: Nat) = new Succ(n + that)
+    def -(that: Nat) = if (that.isZero) this else n - that.predecessor
+  }
+  ````
