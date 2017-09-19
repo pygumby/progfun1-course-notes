@@ -1086,13 +1086,11 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   new Function1[Int, Int] {
     def apply(x: Int) = x * x
   }
-
   ````
 
 + A function call such as `f(a, b)`, is expanded to `f.apply(a, b)`. Remember, `f` is the value of a class type!
 
 + Methods are no objects, if they were, then `apply` would be an instance of some `Function` class, and a call to it would be a call to its `apply` method, so we'd end up in an infinite loop. However, if some function `f` is used in a place where a `Function` type is expected, one is automatically provided. E.g., for a method `def f(x: Int): Boolean  `, `(x: Int) => f(x)` would be provided. In lambda calculus, this conversion is known as "eta expansion"
-
 
 + Given our `List` type, we could define an object of the same name, which provides the means to obtain a list of two elements, e.g., `1` and `2`, by writing `List(1, 2)`.
 
@@ -1103,3 +1101,60 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
       new Cons(x1, new Cons(x2, new Nil))
   }
   ````
+
+### Lecture 4.3 -- Subtyping and Generics
+
++ We have already covered two forms of polymorphism, i.e., subtyping, which originated in object-oriented programming, and generics, which originated in functional programming.
++ As a reminder, subtyping allows us to pass a type where a base type was required, while generics enable types to be parameterized with other types.
++ In this lecture, we will look at how subtyping and generics interact. In this context, we will look at two main areas:
+  + Bounds (Subjecting type parameters to subtype constraints)
+  + Variance (How do parameterized types behave under subtyping?)
+
++ Type bounds
+
+  + Consider a method `assertAllPos`, which takes  an `IntSet` and returns it if all elements are positive, otherwise it will throw an error.
+
+  + What would its signature look like if we wanted it to reflect the following two equations:
+
+    ````
+    assertAllPos(Empty)    = Empy
+    assertAllPos(NonEmpty) = Either NonEmpty or Exception
+    ````
+
+    In other words, we want the signature to reflect that if we provide an instance of `IntSet`'s subtype `Empty`, we will get an `Empty` back, and if we provide an instance of `IntSet`'s subtype `NonEmpty`, we get a `NonEmpty` back (if no exception has been thrown). In no case do we provide, say, a `Empty` and receive a `NonEmpty`. One way to express this is:
+
+    ```` scala
+    def assertAllPos[S <: IntSet](r: S): S
+    ````
+
+  + `<: IntSet` is an upper bound of the type parameter `S`. This notation is also used outside of type bounds. Generally, it means this:
+
+    + `S <: T` means `S` is a subtype of `T`
+    + `S >: T` means `S` is a supertype of `T`, or `T` is a subtype of `S`
+
+  + Lower bounds can also be used: `[S >: NonEmpty]` introduces a type parameter `S` that can range only over supertypes of `NonEmpty`. Consequently, `S` could be one of `NonEmpty`, `IntSet`, `AnyRef`, or `Any`.
+
+  + `S` can also be bound from below (`NonEmpty`) as well as from above (`IntSet`): `[S >: NonEmpty <: IntSet]` restricts `S` to the interval between `NonEmpty` and `IntSet`, which only contains `NonEmpty` and `IntSet`.
+
++ Covariance
+
+  + Should `NonEmpty <: IntSet` imply `List[NonEmpty] <: List[IntSet]`?
+
+  + Types for which this relationship holds are called covariant, because their subtyping relationship varies with the type parameter. For example, if `List` were covariant, `List[S]` would only be a subtype of `List[T]` if `S` was a subtype of `T`. Thus, the relationship of the two `List` types would depended on the relationship of the two type parameters.
+
+  + Covariance does not always make sense. Consider this Java code:
+
+    ````java
+    NonEmpty[] a = new NonEmpty[]{new NonEmpty(1, Empty, Empty)}
+    IntSet[] b = a
+    b[0] = Empty
+    NonEmpty s = a[0]
+    ````
+
+    In this (compiling!) example, we assign an `Empty` to variable of type `NonEmpty`! At run time, assigning `Empty` to `b[0]` will cause an `ArrayStoreException` to be thrown. (Java stores a type tag for every array, so it knows that this assignment is malicious.) Thus, making arrays covariant produced a hole in the type system (assignment compiles) that had to be patched with run time checks (comparing against type tag).
+
+  + The following principle ("The Liskov Substitution Principle") tells us when a type can be subtype of another:
+
+    > If `A <: B`, then everything one can do with a value of type `B`, one should also be able to do with value of type `A`.
+
+    How would this translate to the problem described above? Well, `NonEmpty[]` should not be a subtype of `IntSet[]`, because one can put `Empty` instances into `IntSet[]` but not into `NonEmpty[]`
