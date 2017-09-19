@@ -1004,8 +1004,8 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 + In a pure object-oriented programming language, each value is an object. If this language is based on classes, the type of each value, i.e., object, would be a class.
 
   + In Scala, there are not just reference types but also primitive types and functions. Does this mean Scala is not purely object-oriented?
-    + Conceptually, primitive types, e.g., `Int`, do not receive any special treatment and are used like other classes. The fact that, under the hood, `Int`s are represented as 32-bit integers, can be regarded as a mere optimization.
-    + Functions are actually represented by classes, too, just like I have demonstrated at the end of lecture 3.2.
+    + Conceptually, primitive types, e.g., `Int`, do not receive any special treatment and are used like other classes. The fact that, under the hood, `Int`s are represented as 32-bit integers, can be regarded as a mere optimization. The rest of this section elaborates on this point.
+    + Functions are actually represented by classes, too, just like I have demonstrated at the end of lecture 3.2. Lecture 4.2 elaborates on classes representing functions. 
 
 + Scala's `Boolean` type maps to the JVM's primitive type `boolean`, however, one could easily implement a purely object-oriented `Boolean`  type from scratch.
 
@@ -1064,5 +1064,42 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
     def predecessor = n
     def +(that: Nat) = new Succ(n + that)
     def -(that: Nat) = if (that.isZero) this else n - that.predecessor
+  }
+  ````
+
+### Lecture 4.2 -- Functions as Objects
+
++ In Scala, function values are objects. `A => B` is just a shorthand for `scala.Function1[A, B]`, which is defined similar to what I defined at the end of lecture 3.2. To represent functions with two parameters, there is `Function2`, to represent those with three parameters, there is `Function2`, and so on.
+
++ This is what anonymous function definitions are expanded to:
+
+  ````scala
+  (x: Int) = x * x
+  // ...is expanded to...
+  {
+    class AnonFun extends Function1[Int, Int] {
+      def apply(x: Int) = x * x
+    }
+    new AnonFun
+  }
+  // ...or, for short, using anonymous class syntax
+  new Function1[Int, Int] {
+    def apply(x: Int) = x * x
+  }
+
+  ````
+
++ A function call such as `f(a, b)`, is expanded to `f.apply(a, b)`. Remember, `f` is the value of a class type!
+
++ Methods are no objects, if they were, then `apply` would be an instance of some `Function` class, and a call to it would be a call to its `apply` method, so we'd end up in an infinite loop. However, if some function `f` is used in a place where a `Function` type is expected, one is automatically provided. E.g., for a method `def f(x: Int): Boolean  `, `(x: Int) => f(x)` would be provided. In lambda calculus, this conversion is known as "eta expansion"
+
+
++ Given our `List` type, we could define an object of the same name, which provides the means to obtain a list of two elements, e.g., `1` and `2`, by writing `List(1, 2)`.
+
+  ````scala
+  object List {
+    // List(1, 2) == List.apply(1, 2)
+    def apply[T](x1: T, x2: T): List[T] =
+      new Cons(x1, new Cons(x2, new Nil))
   }
   ````
