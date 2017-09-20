@@ -1281,3 +1281,101 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
    + By being of type `Empty`, `elem` is also a `IntSet`.
 
   Thus, the return type of the function is `List[IntSet]`.
+
+### Lecture 4.5 -- Decomposition
+
++ Decomposition is an important problem in programming. Suppose we have a hierarchy of classes and want to build tree-like data structures from the instances of these classes. How would we find out what kinds of elements are in this tree?
+
++ To find out more about this, let's start with a simple example: A small interpreter for arithmetic expressions. Expressions are represented as a class hierarchy, with a base trait `Expr` and two subclasses, `Number` and `Sum`.
+
+  ````scala
+  trait Expr {
+    def isNumber: Boolean
+    def isSum: Boolean
+    def numValue: Int
+    def leftOp: Expr
+    def rightOp: Expr
+  }
+
+  class Number(n: Int) extends Expr {
+    def isNumber: Boolean = true
+    def isSum: Boolean = false
+    def numValue: Int = n
+    def leftOp: Expr = throw new Error("Number.leftOp")
+    def rightOp: Expr = throw new Error("Number.rightOp")
+  }
+
+  class Sum(e1: Expr, e2: Expr) extends Expr {
+    def isNumber: Boolean = false
+    def isSum: Boolean = true
+    def numValue: Int = throw new Error("Sum.numValue")
+    def leftOp: Expr = e1
+    def rightOp: Expr = e2
+  }
+  ````
+
+  Now, we can easily write an evaluation function.
+
+  ````scala
+  def eval(e: Expr): Int = {
+    if (e.isNumber) e.numValue
+    else if (e.isSum) eval(e.leftOp) + eval(e.rightOp)
+    else throw new Error("Unknown expression " + e)
+  }
+  ````
+
+  However, it is tedious to write out all these classification methods, e.g., `isNumber`, as well as accessor functions, e.g., `numValue`. Furthermore,  if we want to add new expressions, e.g., the ones below, we need to add classification and accessor methods to all classes defined above.
+
+  ````scala
+  class Prod(e1: Expr, e2: Expr) extends Expr
+  class Var(x: String) extends Expr
+  ````
+
+  Actually, in order to integrate `Prod` and `Var` into the hierarchy, 25 new methods would need to be defined. In fact, if we continued to add new expressions, there would be a quadratic increase in methods we would need to define.
+
++ A "non-solution" to this problem would be to use type tests and type casts. These can be done using the following methods defined in class `Any`:
+
+  ````scala
+  def isInstanceOf[T]: Boolean // Checks whether this object's type conforms to `T`
+  def asInstanceOf[T]: T       // Treats this object as an instance of type `T`,
+                               // throws a `ClassCastException` if it isn't. 
+  ````
+
+  Here is a definition of the `eval` method using type tests and type casts:
+
+  `````scala
+  def eval(e: Expr): Int =
+    if (e.isInstanceOf[Number])
+      e.asInstanceOf[Number].numValue
+    else if (e.isInstanceOf[Sum])
+      eval(e.asInstanceOf[Sum].leftOp) +
+      eval(e.asInstanceOf[Sum].rightOp)
+    else throw new
+      Error("Unknown expression " + e)
+  `````
+
+  On the plus side, with this approach, there is no need for classification methods at all, and the accessor methods are only for the classes where the value in question is defined. However, the usage of type tests and type casts is very low-level. Generally, relying on them is error-prone, since, at run time, we never know whether a type cast will succeed or not. (Above, we can statically assure that the type casts will not fail, since we guarded them with type checks, but still.)
+
++ Another -- better -- approach would be object-oriented decomposition. Suppose all we wanted to do is evaluate expressions evaluate expressions.
+
+  ````scala
+  trait Expr {
+    def eval: Int
+  }
+
+  class Number(n: Int) extends Expr {
+    def eval: Int = n
+  }
+
+  class Sum(e1: Expr, e2: Expr) extends Expr {
+    def eval: Int = e1.eval + e2.eval
+  }
+  ````
+
+  However, this approach is limited. Say we want to simplify expressions using this rule:
+
+  ````scala
+  a * b + a * c -> a * (b + c)
+  ````
+
+  This is a non-local simplification. It cannot be encapsulated into a method of one object. In order to inspect our tree-like data structure of `Expr` instances, we need to go back to square one, using classification and accessor methods.
