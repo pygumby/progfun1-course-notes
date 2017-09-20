@@ -1142,10 +1142,11 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 
   + Types for which this relationship holds are called covariant, because their subtyping relationship varies with the type parameter. For example, if `List` were covariant, `List[S]` would only be a subtype of `List[T]` if `S` was a subtype of `T`. Thus, the relationship of the two `List` types would depended on the relationship of the two type parameters.
 
-  + Covariance does not always make sense. Consider this Java code:
+  + Covariance does not always make sense. Consider this Java code snippet:
 
     ````java
     NonEmpty[] a = new NonEmpty[]{new NonEmpty(1, Empty, Empty)}
+    // In Scala, this line wouldn't compile, as Scala arrays aren't covariant.
     IntSet[] b = a
     b[0] = Empty
     NonEmpty s = a[0]
@@ -1157,4 +1158,126 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 
     > If `A <: B`, then everything one can do with a value of type `B`, one should also be able to do with value of type `A`.
 
-    How would this translate to the problem described above? Well, `NonEmpty[]` should not be a subtype of `IntSet[]`, because one can put `Empty` instances into `IntSet[]` but not into `NonEmpty[]`
+    How would this translate to the problem described above? Well, `NonEmpty[]` should not be a subtype of `IntSet[]`, because one can put `Empty` instances into `IntSet[]` but not into `N`
+
+    `onEmpty[]`
+
+### Lecture 4.4 -- Variance
+
++ In this lecture, we are going to cover the concept of variance, i.e., how subtyping relates to genericity.
+
++ In the previous lecture, it has been demonstrated how some types should be covariant whereas others shouldn't.
+
+  + Generally, a type that permits its elements to be mutated should not be covariant, e.g. arrays.
+  + Analogously, immutable types can be covariant, if certain restrictions on methods are met, e.g. lists.
+
++ Given a type `C[T]` as well as two types `A` and `B` with `A <: B`, there are three possible relationships between `C[A]` and `C[B]`:
+
+  + `C` is covariant: `C[A] <: C[B]`
+  + `C` is contravariant: `C[A] <: C[B]`
+  + `C` is nonvariant: Neither `C[A]` nor `C[B]` are subtype of the other.
+
++ By annotating the type parameter, a type's variance can be declared:
+
+  + `C` is covariant: `class C[+A]`
+  + `C` is contravariant: `class C[-A]`
+  + `C` is nonvariant: `class C[A]`
+
++ Consider the following two types `A` and `B`. According to the Liskov Subsitution Principle, should `A` be a subtype of `B` (`A <: B`), `B` be a subtype of `A` (`B <: A`), or should they be unrelated?
+
+  ````scala
+  type A = IntSet => NonEmpty
+  type B = NonEmpty => IntSet
+  ````
+
+  Since `NonEmpty <: IntSet` is true, `A <: B` should hold.
+
+  + Whenever we expect a function that takes a `NonEmpty` as argument, a function that takes an `IntSet` will satisfy this requirement.
+  + Whenever we expect a function that returns an `IntSet`, a function that returns a `NonEmpty` does just that.
+  + To put it in terms of the aforementioned principle, you can do with `A` everything you can do with `B`.
+
++ Generally, there is the following subtyping rule between function types: If `A2 <: A1` and `B1 <: B2`, then ` A1 => B1 <: A2 => B2 `. Thus, you can always do the following:
+
+  ````scala
+  val f: Function1[A2, B2] = new Function[A1, B1] { /* ... */ }
+  ````
+
++ Since we now know that functions are contravariant in their argument type(s) and covariant in their return type(s), we can revise our `Function1` trait from before:
+
+  ````scala
+  trait Function1[-T, +U] {
+    def apply(x: T): U
+  }
+  ````
+
++ We have, however, seen an example, i.e., `Array[+T]`, in which covariance in combination a certain method, i.e., `update(T)`, is unsound. You may want to refer back to the Java code snippet of lecture 4.3, in which updating the element of an array -- which are covariant in Java -- causes a run time error to be thrown. The problem of the code below is that the covariant type parameter `T` is the type of a method parameter.
+
+  ````scala
+  class Array[+T] {
+    def update(x: T) // ...
+  }
+  ````
+
++ Thus, the Scala compiler enforces certain rules regarding variance annotations. Roughly, these variance checks are:
+
+  + Covariant type parameters may only appear in method results.
+  + Contravariant type parameters can only appear in method parameters.
+  + Invariant type parameters can appear everywhere.
+
++ In the following, we are going to improve our `List` implementation. The first goal is to make `Nil` a singleton object, as there really is only one empty list. We can easily achieve this by changing its signature to `object Nil extends List[Nothing]`. However, a `Cons[T]` expects a `List[T]` as its second argument (`tail`). Thus, we cannot pass `Nil`, i.e., a `List[Nothing]`, as the second argument of, say, a `List[String]`. Sure, `Nothing <: String`, but `List[Nothing]` and `List[String]` have no subtyping relationship. Obviously, we have to make `List` covariant. Here's the revised code:
+
+  ````scala
+  trait List[+T] {
+    def isEmpty: Boolean
+    def head: T
+    def tail: List[T]
+  }
+
+  class Cons[T](val head: T, val tail: List[T]) extends List[T] {
+    def isEmpty: Boolean = false
+  }
+
+  object Nil extends List[Nothing] {
+    def isEmpty: Boolean = true
+    def head: Nothing = throw new NoSuchElementException("Nil.head")
+    def tail: Nothing = throw new NoSuchElementException("Nil.tail")
+  }
+
+  // Now, we can do this:
+  val l1: List[String] = Nil
+  val l2: List[String] = new Cons("Hello, world.", Nil)
+  ````
+
++ Lastly, we want add a `prepend` method to our `List` class. However, the following does not compile, as it violates the one of the variance rules enforced by the compiler, i.e., covariant type parameters may only appear in method results.
+
+  ````scala
+  // Caution, this does not compile!
+  trait List[+T] {
+    def prepend(elem: T): List[T] = new Cons(elem, this)
+  }
+  ````
+
+  The compiler is actually right to reject the previous definition, as it violates the Liskov Substitution Principle: Not everything you can do with a `List[IntSet]` you can do with a `List[NonEmpty]`, e.g.,  `prepend` an `Empty`. Thus, `List[NonEmpty]` cannot be a subtype of `List[IntSet]`.
+
++ How can we make `prepend`, which is a natural list on immutable lists, variance-correct? By the use of a lower bound:
+
+  `````scala
+  def prepend[U >: T](elem: U): List[U] = new Cons(elem, this)
+  `````
+
+  This compiles, because:
+
+  + Covariant type parameters may appear in lower bounds of method type parameters.
+  + Contravariant type parameters may appear in upper bounds of method type parameters.
+
++ What is the result type of `def f(xs: List[NonEmpty], x: Empty) = xs prepend x`? This function definition compiles, so we know the argument for the `prepend` method's type parameter `U` must satisfy two conditions:
+
+  + `U >: T` must hold, and since `T` is `NonEmpty`, `U ` has to be either `NonEmpty`, `IntSet`, `AnyRef`, or `Any`.
+  + `elem`, which is of type `Empty`, must conform to `U`.
+
+  The type inferencer chooses `U` to be `IntSet`.
+
+   + `IntSet` is a superclass of `NonEmpty`.
+   + By being of type `Empty`, `elem` is also a `IntSet`.
+
+  Thus, the return type of the function is `List[IntSet]`.
