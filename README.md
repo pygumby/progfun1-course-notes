@@ -1374,8 +1374,149 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
 
   However, this approach is limited. Say we want to simplify expressions using this rule:
 
-  ````scala
+  ````
   a * b + a * c -> a * (b + c)
   ````
 
   This is a non-local simplification. It cannot be encapsulated into a method of one object. In order to inspect our tree-like data structure of `Expr` instances, we need to go back to square one, using classification and accessor methods.
+
+### Lecture 4.6 -- Pattern Matching
+
++ Recap
+
+  + We are still trying to find a general and convenient way to access objects in a extensible class hierarchy.
+
+  + Here is what we already tried:
+
+    + Classification and accessor methods: quadratic "explosion" of number of methods to be defined for each new subtype of `Expr`
+    + Type tests and type casts: unsafe, low-level
+    + Object-oriented decomposition: does not work for every problem to be solved, all classes need to be touched to add a new method.
+
+  + Observation: The purpose of the classification and accessor methods can be viewed as reversing the construction process:
+
+    + What class was used?
+    + What were the arguments to the constructor when it was invoked?
+
+    This situation is so common in functional programming languages that many offer a construct to automate it. In Scala and other languages, e.g., Haskell, this construct is called pattern matching. It is introduced in the rest of this lecture.
+
++ A case class definition is like a normal class definition, except that it is preceded by the modifier `case`.
+
+  `````scala
+  trait Expr
+  case class Number(n: Int) extends Expr
+  case class Sum(e1: Expr, e2: Expr) extends Expr
+  `````
+
+  Other than defining a trait and two concrete subclasses of it, so-called companion objects with `apply` methods are defined implicitly.
+
+  ````scala
+  object Number {
+    def apply(n: Int) =
+      new Number(n)
+  }
+
+  object Sum {
+    def apply(e1: Expr, e2: Expr) =
+      new Sum(e1, e2)
+  }
+  ````
+
+  As we saw before, terms like `Number(2)` expand into `Number.apply(2)`, so we can just write `Number(2)`
+
+   instead of `new Number(2)`.
+
++ In Scala, pattern matching is expressed using the `match ` keyword.
+
+  ````scala
+  def eval(e:Expr): Int = e match {
+    case Number(n) => n
+    case Sum(e1, e2) => eval(e1) + eval(e2)
+  }
+  ````
+
+  + The syntax can be described as follows: The `match` keyword is followed by a sequence of `case`s, each of which associate a pattern (``pat``) with an expression (`expr`): `pat => expr`.
+
+  + Patterns are constructed from:
+
+    + Constructors, e.g, ``Number``, ``Sum``
+    + Variables, e.g., `n`, `e1`, `e2`
+    + Constants, e.g. `1`, `true`
+      + Besides literal constants, there can also be named constants.
+    + Wildcard pattern, i.e., `_`
+      + This indicates that we do not care about the value, we cannot reference it inside the expression.
+
+    There is some "fine print":
+
+    + Variables begin with a lowercase letter.
+    + The same variable name may appear only once in a pattern, thus, ``Sum(x, x)`` is not a legal pattern.
+    + Names of constants begin with a capital letter, with the exception of reserved words `null`, ``true``, ``false``. What if we some named constant, say, `val hello = "Hello, world."` is in scope and we want to use it in our pattern. Then we must either surround it with backticks (`` `hello` ``) or make it uppercase (`Hello`). See the following StackOverflow post for more information: https://stackoverflow.com/questions/7078022/why-does-pattern-matching-in-scala-not-work-with-variables
+
+  + Patterns are evaluated as follows: An expression `e match { case p1 => e1 ... case pn => en }` matches the value of the selector `e` with the patterns ``p1, ..., pn`` in the order in which they are written. The whole match expression is rewritten to the right-hand side of the first case where the pattern matches matches `e`. Variables in the pattern are replaced by the corresponding parts in the selector.
+
+    + When do patterns match?
+
+      + A constructor pattern `C(p1, ..., pn)` matches all instances of type `C` (or subtypes) that were constructed with arguments matching the patterns `p1, ..., pn`.
+      + A variable pattern `x` matches any value, and binds the name of the variable to it.
+      + A constant pattern `c` matches values that are equal to `c` (in the sense of `==`)
+
+    + This is what the evaluation of a pattern matching expression looks like:
+
+      ````scala
+         eval(Sum(Number(1), Number(2)))
+
+      -> Sum(Number(1), Number(2)) match {
+           case Number(n) => n
+           case Sum(e1, e2) => eval(e1) + eval(e2)
+         }
+
+      -> eval(Number(1)) + eval(Number(2))
+
+      -> Number(1) match {
+           case Number(n) => n
+           case Sum(e1, e2) => eval(e1) + eval(e2)
+         } + eval(Number(2))
+
+      -> 1 + eval(Number(2))
+
+      // ...
+
+      -> 3
+      ````
+
+  + Obviously, we could also define the evaluation function as a member function of our base trait `Expr`:
+
+    ````scala
+    trait Expr {
+      def eval: Int = this match {
+        case Number(n) => n
+        case Sum(e1, e2) => e1.eval + e2.eval
+      }
+    }
+    ````
+
+    This is equivalent to `eval` as we previously defined it, except that we now pattern match over `this` and write `e1.eval` instead of `eval(e1)`.
+
+  + Now, what is the difference between the pattern-matching-based approach of this lecture and the object-oriented decomposition approach from the lecture before? It comes down to whether we more often create new subclasses, e.g., `Number`, or do we more often create new methods, e.g., `eval`? In the former class, the object-oriented approach is favorable, as we can create a new subclass of `Expr`, e.g., `Var`, and simply implement `eval` in it without having to touch any existing code.  On the other hand, if we mostly add new functions, e.g., `show`, it's easiest to just use pattern matching and add the new function to the base trait or even put it outside of it -- no need to touch any existing classes. This two-dimensional problem (subclasses vs. functions) is called the "expression problem".
+
++ Lastly, an exercise is given, asking us to define two subclasses of `Expr`, `Var` for variables `x` and `Prod` for products `x * y`. Then, we are asked to implement a method ``show``, that gets operator precedence right, i.e., that it uses as few parentheses as necessary. Here's my shot at it:
+
+  ````scala
+  def show(e: Expr): String = e match {
+    case Number(x) => x.toString
+    case Sum(e1, e2) => show(e1) + " + " + show(e2)
+    case Prod(e1, e2) =>
+      val lhs = e1 match {
+        case Sum(se1, se2) => "(" + show(se1) + " + " + show(se2) + ")"
+        case _ => show(e1)
+      }
+      val rhs = e2 match {
+        case Sum(se1, se2) => "(" + show(se1) + " + " + show(se2) + ")"
+        case _ => show(e2)
+      }
+      lhs + " * " + rhs
+    case Var(x) => x
+  }
+
+  show(Sum(Prod(Number(2), Var("x")), Var("y"))) // 2 * x + y
+  show(Prod(Sum(Number(2), Var("x")), Var("y"))) // (2 + x) * y
+  ````
