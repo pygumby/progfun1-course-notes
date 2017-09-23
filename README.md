@@ -1520,3 +1520,83 @@ All the credit goes to the author of the course, Prof. Dr. Martin Odersky ([@ode
   show(Sum(Prod(Number(2), Var("x")), Var("y"))) // 2 * x + y
   show(Prod(Sum(Number(2), Var("x")), Var("y"))) // (2 + x) * y
   ````
+
+### Lecture 4.7 -- Lists
+
++ As mentioned before, lists are a fundamental data structure in functional programming.
+
++ A list having `x1`, ..., `xn` as elements is written `List(x1, ..., xn)`.
+
+  ````scala
+  val fruit = List("apples", "oranges", "pears")
+  val nums  = List(1, 2, 3, 4)
+  ````
+
++ There are two important differences between lists and arrays:
+
+  + Lists are immutable, while arrays are mutable, i.e., you can update its elements.
+  + Lists are recursive, while arrays are flat.
+
++ Like arrays, lists are homogenous. `scala.List` (or, for short, `List`) takes one type parameter `T`, which denotes the type of all the elements of the list.
+
+  ````scala
+  val fruit = List[String]("apples", "oranges", "pears")
+  val nums  = List[Int](1, 2, 3, 4)
+  ````
+
++ All lists are constructed from the empty list `Nil` and the construction operation `::` (pronounced `cons`), so that ``x :: xs `` results in a new list with `x` being the first element of the list (head), and `xs` being the rest of the list (tail). (In our own list implementation, this would be `new Cons(x, xs)`.)
+
+  ````scala
+  val fruit = "apples" :: ("oranges" :: ("pears" :: Nil))
+  val nums  = 1 :: (2 :: (3 :: (4 :: Nil)))
+  val empty = Nil
+  ````
+
++ By convention, operators ending in `:` associate to the right, thus, `A :: B :: C` can be interpreted as `A :: (B :: C)`: Consequently, we can omit the parentheses and just write:
+
+  ````scala
+  val fruit = "apples" :: "oranges" :: "pears" :: Nil
+  val nums  = 1 :: 2 :: 3 :: 4 :: Nil
+  ````
+
+  Furthermore, operators ending in `:` are also different in that they are seen as method calls of the right-hand operand. So the expression `1 :: 2 :: 3 :: 4 :: Nil` is equivalent to `Nil.::(4).::(3).::(2).::(1)`. (So it really corresponds to the `prepend` method of our own list implementation.)
+
++ All operations on lists can be defined in terms of the three operations `head`, `tail`, and `isEmpty`, which are defined as methods of objects of the type `List`.
+
++ Lists can be decomposed using pattern matching:
+
+  + A pattern matching the `Nil` constant: `Nil`
+  + A pattern matching a list with a head matching `p` and a tail matching `ps`: `p :: ps` (`List(p1, ..., pn)` is equivalent to `p1 :: ... :: pn :: Nil`.)
+
+  ````scala
+  List(1, 2, xs) // Matches lists starting with the elements `1` and `2`,
+                 // equivalent to `1 :: 2 :: xs`
+  List(x)        // Matches lists with one element, equivalent to `x :: Nil`
+  List()         // Matches the empty list, equivalent to `Nil`
+  ````
+
++ The length of a list that is matched by the pattern `x :: y :: List(xs, ys) :: zs` is >= 3, as it matches a list with a first element `x`, a second element `y`, a third element `List(xs, ys)`, which is itself a list, and a tail `zs`.
+
++ Finally, the insertion sort algorithm for sorting a list of numbers in ascending order is given.
+
+  1. Given a list of numbers to be sorted, we first recursively call the algorithm to sort the tail of the list.
+  2. Then, after having obtained a sorted list containing the elements of the tail of the original list in an ascending order,  we insert the head element of the original list into the sorted list at the right position.
+
+  ````scala
+  def isort(xs: List[Int]): List[Int] = xs match {
+    case List() => List()
+    case y :: ys => insert(y, isort(ys))
+  }
+
+  def insert(x: Int, xs: List[Int]): List[Int] = xs match {
+    case List() => List(x)
+    case y :: ys => if (x < y) x :: xs else y :: insert(x, ys)
+  }
+  ````
+
+  The worst-case complexity of of insertion sort relative to the length of the input list `n` is proportional to `n^2`
+
+  + Looking at `insert` first, the worst case is that `x` is greater than all the elements of the list `xs`, so its steps would be proportional to `n`, where `n` is the length of the list.
+  + `isort` calls insert `n` times, where `n` is the length of the original list.
+
+  ​
