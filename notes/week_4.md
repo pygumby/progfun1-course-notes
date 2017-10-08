@@ -7,7 +7,8 @@
 + In a pure object-oriented programming language, each value is an object. If this language is based on classes, the type of each value, i.e., object, would be a class.
 
   + In Scala, there are not just reference types but also primitive types and functions. Does this mean Scala is not purely object-oriented?
-    + Conceptually, primitive types, e.g., `Int`, do not receive any special treatment and are used like other classes. The fact that, under the hood, `Int`s are represented as 32-bit integers, can be regarded as a mere optimization. The rest of this section elaborates on this point.
+
+    + Conceptually, primitive types, e.g., `Int`, do not receive any special treatment and are used like other classes. The fact that, under the hood, `Int`s are represented as 32-bit integers, can be regarded as a mere optimization. The rest of this lecture elaborates on this point.
     + Functions are actually represented by classes, too, just like I have demonstrated at the end of lecture 3.2. Lecture 4.2 elaborates on classes representing functions. 
 
 + Scala's `Boolean` type maps to the JVM's primitive type `boolean`, however, one could easily implement a purely object-oriented `Boolean`  type from scratch.
@@ -72,7 +73,7 @@
 
 ### Lecture 4.2 -- Functions as Objects
 
-+ In Scala, function values are objects. `A => B` is just a shorthand for `scala.Function1[A, B]`, which is defined similar to what I defined at the end of lecture 3.2. To represent functions with two parameters, there is `Function2`, to represent those with three parameters, there is `Function2`, and so on.
++ In Scala, function values are objects. `A => B` is just a shorthand for `scala.Function1[A, B]`, which is defined similar to what I defined at the end of lecture 3.2. To represent functions with two parameters, there is `Function2`, to represent those with three parameters, there is `Function3`, and so on.
 
 + This is what anonymous function definitions are expanded to:
 
@@ -85,15 +86,15 @@
     }
     new AnonFun
   }
-  // ...or, for short, using anonymous class syntax
+  // ...or, for short, using anonymous class syntax...
   new Function1[Int, Int] {
     def apply(x: Int) = x * x
   }
   ````
 
-+ A function call such as `f(a, b)`, is expanded to `f.apply(a, b)`. Remember, `f` is the value of a class type!
++ A function call such as `f(a, b)` is expanded to `f.apply(a, b)`. Remember, `f` is the value of a class type!
 
-+ Methods are no objects, if they were, then `apply` would be an instance of some `Function` class, and a call to it would be a call to its `apply` method, so we'd end up in an infinite loop. However, if some function `f` is used in a place where a `Function` type is expected, one is automatically provided. E.g., for a method `def f(x: Int): Boolean  `, `(x: Int) => f(x)` would be provided. In lambda calculus, this conversion is known as "eta expansion"
++ Methods are no objects, if they were, then `apply` would be an instance of some `Function` class, and a call to it would be a call to its `apply` method, so we'd end up in an infinite loop. However, if some function `f` is used in a place where a `Function` type is expected, one is automatically provided. E.g., for a method `def f(x: Int): Boolean  `, `(x: Int) => f(x)` would be provided. In lambda calculus, this conversion is known as "eta expansion".
 
 + Given our `List` type, we could define an object of the same name, which provides the means to obtain a list of two elements, e.g., `1` and `2`, by writing `List(1, 2)`.
 
@@ -108,8 +109,11 @@
 ### Lecture 4.3 -- Subtyping and Generics
 
 + We have already covered two forms of polymorphism, i.e., subtyping, which originated in object-oriented programming, and generics, which originated in functional programming.
+
 + As a reminder, subtyping allows us to pass a type where a base type was required, while generics enable types to be parameterized with other types.
+
 + In this lecture, we will look at how subtyping and generics interact. In this context, we will look at two main areas:
+
   + Bounds (Subjecting type parameters to subtype constraints)
   + Variance (How do parameterized types behave under subtyping?)
 
@@ -132,8 +136,8 @@
 
   + `<: IntSet` is an upper bound of the type parameter `S`. This notation is also used outside of type bounds. Generally, it means this:
 
-    + `S <: T` means `S` is a subtype of `T`
-    + `S >: T` means `S` is a supertype of `T`, or `T` is a subtype of `S`
+    + `S <: T` means `S` is a subtype of `T`.
+    + `S >: T` means `S` is a supertype of `T`, or `T` is a subtype of `S`.
 
   + Lower bounds can also be used: `[S >: NonEmpty]` introduces a type parameter `S` that can range only over supertypes of `NonEmpty`. Consequently, `S` could be one of `NonEmpty`, `IntSet`, `AnyRef`, or `Any`.
 
@@ -143,7 +147,7 @@
 
   + Should `NonEmpty <: IntSet` imply `List[NonEmpty] <: List[IntSet]`?
 
-  + Types for which this relationship holds are called covariant, because their subtyping relationship varies with the type parameter. For example, if `List` were covariant, `List[S]` would only be a subtype of `List[T]` if `S` was a subtype of `T`. Thus, the relationship of the two `List` types would depended on the relationship of the two type parameters.
+  + Types for which this relationship holds are called covariant, because their subtyping relationship varies with the type parameter. For example, if `List` were covariant, `List[S]` would be a subtype of `List[T]` if `S` was a subtype of `T`. Thus, the relationship of the two `List` types would depended on the relationship of the two type parameters.
 
   + Covariance does not always make sense. Consider this Java code snippet:
 
@@ -175,7 +179,7 @@
 + Given a type `C[T]` as well as two types `A` and `B` with `A <: B`, there are three possible relationships between `C[A]` and `C[B]`:
 
   + `C` is covariant: `C[A] <: C[B]`
-  + `C` is contravariant: `C[A] <: C[B]`
+  + `C` is contravariant: `C[A] >: C[B]`
   + `C` is nonvariant: Neither `C[A]` nor `C[B]` are subtype of the other.
 
 + By annotating the type parameter, a type's variance can be declared:
@@ -194,7 +198,9 @@
   Since `NonEmpty <: IntSet` is true, `A <: B` should hold.
 
   + Whenever we expect a function that takes a `NonEmpty` as argument, a function that takes an `IntSet` will satisfy this requirement.
+
   + Whenever we expect a function that returns an `IntSet`, a function that returns a `NonEmpty` does just that.
+
   + To put it in terms of the aforementioned principle, you can do with `A` everything you can do with `B`.
 
 + Generally, there is the following subtyping rule between function types: If `A2 <: A1` and `B1 <: B2`, then ` A1 => B1 <: A2 => B2 `. Thus, you can always do the following:
@@ -203,7 +209,7 @@
   val f: Function1[A2, B2] = new Function[A1, B1] { /* ... */ }
   ````
 
-+ Since we now know that functions are contravariant in their argument type(s) and covariant in their return type(s), we can revise our `Function1` trait from before:
++ Since we now know that functions are contravariant in their argument type(s) and covariant in their return type, we can revise our `Function1` trait from before:
 
   ````scala
   trait Function1[-T, +U] {
@@ -325,7 +331,7 @@
   }
   ````
 
-  However, it is tedious to write out all these classification methods, e.g., `isNumber`, as well as accessor functions, e.g., `numValue`. Furthermore,  if we want to add new expressions, e.g., the ones below, we need to add classification and accessor methods to all classes defined above.
+  However, it is tedious to write out all these classification methods, e.g., `isNumber`, as well as accessor functions, e.g., `numValue`. Furthermore, if we want to add new expressions, e.g., the ones below, we need to add classification and accessor methods to all classes defined above.
 
   ````scala
   class Prod(e1: Expr, e2: Expr) extends Expr
@@ -357,7 +363,7 @@
 
   On the plus side, with this approach, there is no need for classification methods at all, and the accessor methods are only for the classes where the value in question is defined. However, the usage of type tests and type casts is very low-level. Generally, relying on them is error-prone, since, at run time, we never know whether a type cast will succeed or not. (Above, we can statically assure that the type casts will not fail, since we guarded them with type checks, but still.)
 
-+ Another -- better -- approach would be object-oriented decomposition. Suppose all we wanted to do is evaluate expressions evaluate expressions.
++ Another -- better -- approach would be object-oriented decomposition. Suppose all we wanted to do is evaluate expressions.
 
   ````scala
   trait Expr {
@@ -435,11 +441,11 @@
   }
   ````
 
-  + The syntax can be described as follows: The `match` keyword is followed by a sequence of `case`s, each of which associate a pattern (``pat``) with an expression (`expr`): `pat => expr`.
+  + The syntax can be described as follows: The `match` keyword is followed by a sequence of `case`s, each of which associate a pattern (`pat`) with an expression (`expr`): `pat => expr`.
 
   + Patterns are constructed from:
 
-    + Constructors, e.g, ``Number``, ``Sum``
+    + Constructors, e.g, `Number`, `Sum`
     + Variables, e.g., `n`, `e1`, `e2`
     + Constants, e.g. `1`, `true`
       + Besides literal constants, there can also be named constants.
@@ -449,16 +455,16 @@
     There is some "fine print":
 
     + Variables begin with a lowercase letter.
-    + The same variable name may appear only once in a pattern, thus, ``Sum(x, x)`` is not a legal pattern.
-    + Names of constants begin with a capital letter, with the exception of reserved words `null`, ``true``, ``false``. What if we some named constant, say, `val hello = "Hello, world."` is in scope and we want to use it in our pattern. Then we must either surround it with backticks (`` `hello` ``) or make it uppercase (`Hello`). See the following StackOverflow post for more information: https://stackoverflow.com/questions/7078022/why-does-pattern-matching-in-scala-not-work-with-variables
+    + The same variable name may appear only once in a pattern, thus, `Sum(x, x)` is not a legal pattern.
+    + Names of constants begin with a capital letter, with the exception of reserved words `null`, `true`, `false`. What if some named constant, say, `val hello = "Hello, world."`, is in scope, and we want to use it in our pattern. Then we must either surround it with backticks (`` `hello` ``) or make it uppercase (`Hello`). See the following StackOverflow post for more information: https://stackoverflow.com/questions/7078022/why-does-pattern-matching-in-scala-not-work-with-variables
 
-  + Patterns are evaluated as follows: An expression `e match { case p1 => e1 ... case pn => en }` matches the value of the selector `e` with the patterns ``p1, ..., pn`` in the order in which they are written. The whole match expression is rewritten to the right-hand side of the first case where the pattern matches matches `e`. Variables in the pattern are replaced by the corresponding parts in the selector.
+  + Patterns are evaluated as follows: An expression `e match { case p1 => e1 ... case pn => en }` matches the value of the selector `e` with the patterns `p1, ..., pn` in the order in which they are written. The whole match expression is rewritten to the right-hand side of the first case where the pattern matches matches `e`. Variables in the pattern are replaced by the corresponding parts in the selector.
 
     + When do patterns match?
 
       + A constructor pattern `C(p1, ..., pn)` matches all instances of type `C` (or subtypes) that were constructed with arguments matching the patterns `p1, ..., pn`.
       + A variable pattern `x` matches any value, and binds the name of the variable to it.
-      + A constant pattern `c` matches values that are equal to `c` (in the sense of `==`)
+      + A constant pattern `c` matches values that are equal to `c` (in the sense of `==`).
 
     + This is what the evaluation of a pattern matching expression looks like:
 
@@ -567,7 +573,7 @@
 + Lists can be decomposed using pattern matching:
 
   + A pattern matching the `Nil` constant: `Nil`
-  + A pattern matching a list with a head matching `p` and a tail matching `ps`: `p :: ps` (`List(p1, ..., pn)` is equivalent to `p1 :: ... :: pn :: Nil`.)
+  + A pattern matching a list with a head `p` and a tail `ps`: `p :: ps` (`List(p1, ..., pn)` is equivalent to `p1 :: ... :: pn :: Nil`.)
 
   ````scala
   List(1, 2, xs) // Matches lists starting with the elements `1` and `2`,
@@ -576,7 +582,7 @@
   List()         // Matches the empty list, equivalent to `Nil`
   ````
 
-+ The length of a list that is matched by the pattern `x :: y :: List(xs, ys) :: zs` is >= 3, as it matches a list with a first element `x`, a second element `y`, a third element `List(xs, ys)`, which is itself a list, and a tail `zs`.
++ The length of a list that is matched by the pattern `x :: y :: List(xs, ys) :: zs` is >= 3, as it matches a list with a first element `x`, a second element `y`, a third element `List(xs, ys)` (which is itself a list), and a tail `zs`.
 
 + Finally, the insertion sort algorithm for sorting a list of numbers in ascending order is given.
 
@@ -595,7 +601,7 @@
   }
   ````
 
-  The worst-case complexity of of insertion sort relative to the length of the input list `n` is proportional to `n^2`
+  The worst-case complexity of insertion sort relative to the length of the input list `n` is proportional to `n^2`
 
   + Looking at `insert` first, the worst case is that `x` is greater than all the elements of the list `xs`, so its steps would be proportional to `n`, where `n` is the length of the list.
   + `isort` calls insert `n` times, where `n` is the length of the original list.
