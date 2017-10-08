@@ -1,6 +1,6 @@
 # Notes on "Functional Programming Principles in Scala"
 
-![Certificate](certificate/epfl_functional_programming_principles_in_scala_certificate.png)
+[![Certificate](certificate/epfl_functional_programming_principles_in_scala_certificate.png)](https://www.coursera.org/account/accomplishments/records/EEPS5QERHXNC)
 
 ## Overview
 
