@@ -4,26 +4,36 @@
 
 ### Lecture 1.1 -- Programming Paradigms
 
-- Scala is a great tool to learn functional programming and later integrate it with more traditional object-oriented programming.
-- Main programming paradigms are imperative, functional and logic programming. Object-oriented programming can be integrated well with all of those.
++ Scala is a great tool to learn functional programming and later integrate it with more traditional object-oriented programming.
+
++ The main programming paradigms are imperative, functional and logic programming. Object-oriented programming can be integrated well with all of those.
 - Imperative programming is about mutable variables, assignments, and control structures (e.g., `if-then-else`).
-- These strongly correspond to the abstractions of the Von Neumann model: Mutable variables correspond to memory cells, control structures to jumps, etc.
-- Problem: How can we avoid conceptualizing programs word by word? How to scale up?
-- A mathematical theory consists of data types, operations on them, and laws describing the relationship between values and operations. There is no notion of mutability whatsoever.
-- Theories lead to a programming style in which operators are expressed as functions, mutations are avoided, and in which there are powerful ways for the abstraction and composition of functions.
-- In a restricted sense, functional programming means programming without mutable variables and imperative control structures. In a wider sense, it means focusing on functions.
-- In a functional programming language, functions are first-class citizens.
-  - They can be defined anywhere.
-  - They can be passed as parameters and returned as results.
-  - There are operators to compose them.
-- Why functional programming?
-  - It's simpler to reason about programs.
-  - There is better modularity.
-  - It's good for exploiting parallelism.
+
++ These concepts strongly correspond to the abstractions of the Von Neumann model: Mutable variables correspond to memory cells, control structures to jumps, etc.
+
++ Problem: How can we avoid conceptualizing programs word by word? How to scale up?
+
++ A mathematical theory consists of data types, operations on them, and laws describing the relationship between values and operations. There is no notion of mutability whatsoever.
+
++ Theories lead to a programming style in which operators are expressed as functions, mutations are avoided, and in which there are powerful ways for the abstraction and composition of functions.
+
++ In a restricted sense, functional programming means programming without mutable variables and imperative control structures. In a wider sense, it means focusing on functions.
+
++ In a functional programming language, functions are first-class citizens.
+  
+  + They can be defined anywhere.
+  + They can be passed as parameters and returned as results.
+  + There are operators to compose them.
+
++ Why functional programming?
+  
+  + It's simpler to reason about programs.
+  + There is better modularity.
+  + It's good for exploiting parallelism.
 
 ### Lecture 1.2 -- Elements of Programming
 
-+ Every non-trivial languages provides primitive expressions, ways to combine those into larger expressions, and ways to abstract expressions, i.e., naming them.
++ Every non-trivial language provides primitive expressions, ways to combine those into larger expressions, and ways to abstract expressions, i.e., to name them.
 
 + Evaluation of a non-primitive expression:
 
@@ -36,7 +46,7 @@
 + Evaluation of a function application (call-by-value):
 
   1. Evaluate the arguments, from left to right.
-  2. Replace the application with the functions right-hand side (it's body), and, at the same time, replace the formal parameters with the evaluated arguments.
+  2. Replace the application with the function's right-hand side (it's body), and, at the same time, replace the formal parameters with the evaluated arguments.
 
 + This scheme is known as the substitution model. The idea is that evaluation simply reduces an expression to a value. This can be done as long as the expression does not contain side effects.
 
@@ -53,11 +63,11 @@
 
 + Call-by-value and call-by-name reduce to the same values as long as the reduced expression consists of pure functions and both expressions terminate.
 
-+ Call-by-value's advantage is that each argument is only evaluated once, call-by-name's advantage is that unused arguments are not evaluated.
++ Call-by-value's advantage is that each argument is only evaluated once, call-by-name's advantage is that unused arguments are not evaluated at all.
 
 ### Lecture 1.3 -- Evaluation Strategies and Termination
 
-+ If call-by-value evaluation of an expression e terminates, then call-by-name evaluation of e terminates, too. This is not true in the other direction.
++ If the call-by-value evaluation of an expression `e` terminates, then the call-by-name evaluation of `e` terminates, too. This is not true in the other direction.
 
 + The following function application only terminates with call-by-name:
 
@@ -83,7 +93,7 @@
 
 + Consider Boolean expressions such as `true && e`. `&&` and `||` don't always need their right operand to be evaluated. They use "short-circuit evaluation".
 
-+ Definitions can be "by-name" and "by-value", too. In the former case, the right-hand side is evaluated on each invocation, in the latter case, the right-hand side is evaluated once, at the point of definition.
++ Definitions can be "by-name" and "by-value", too. In the former case, the right-hand side is evaluated on each invocation, in the latter case, the right-hand side is evaluated only once, at the point of definition.
 
   ````scala
   def x = 2 // "by-name"
@@ -97,14 +107,14 @@
   or(x, y)  == x || y
   ````
 
-  holds true. Do not use `&&` and `||` in your implementation.
+  holds true. Do not use `&&` and `||` in your implementation. Here is one solution:
 
   ````scala
   def and(x: Boolean, y: => Boolean) =
     if (x) y else false
   ````
 
-  `or` is omitted for brevity.
+  An implementation of `or` is omitted for brevity.
 
 ### Lecture 1.5 -- Example: Square Roots with Newton's Method
 
@@ -131,7 +141,7 @@
 
 ### Lecture 1.6 -- Blocks and Lexical Scope
 
-+ We want to split up a task into many small functions while avoiding "namespace pollution". With regards to the previous example, we can do so by putting the auxiliary function inside of `sqrt`.
++ We want to split up a task into many small functions while avoiding "namespace pollution". With regards to the previous example, we can do so by putting the auxiliary functions inside of `sqrt`.
 
   ````scala
   def sqrt(x: Double) = {
@@ -153,7 +163,7 @@
 
 + Definitions inside a block are only visible from inside it. They shadow definitions from outside it.
 
-+ The value of `result` is `16`.
++ In the following, the value of `result` is `16`.
 
   ````scala
   val x = 0
