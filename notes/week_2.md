@@ -24,7 +24,7 @@
 
 + `A => B` denotes the type of a function that has a parameter of type `A` and returns a `B`. Therefore, the type of `sum` is `Int => Int`.
 
-+ As it is sometimes tedious to define and name functions using `def`, we would like to write them like literals -- without giving them a name. Anonymous functions enable this. Here is an example:
++ As it is sometimes tedious to define and name functions using `def`, we would like to write them like literals, without giving them a name. Anonymous functions enable this. Here is an example:
 
   ````scala
   (x: Int, y: Int) => x + y
@@ -59,7 +59,7 @@
 
   `sum` is now a function that returns another function.
 
-+ The "middlemen" `sumInts` and `sumCubes` can be avoided. We can simply call `sum(cube)(1, 10)`, where `sum(cube)` returns the sum of cubes function and is therefore equivalent to `sumCubes`. Then the resulting function is applied to `(1, 10)`.
++ The "middlemen" `sumInts` and `sumCubes` can be avoided. We can simply call `sum(cube)(1, 10)`, where `sum(cube)` returns the sum of cubes function and is therefore equivalent to `sumCubes`. Then the resulting function is applied to the arguments `1`  and `10`.
 
 + Function application associates to the left.
 
@@ -78,21 +78,21 @@
 
 + By repeating the process n times, `def f(args1)...(argsn-1)(argsn) = E` is shown to be equivalent to `def f = (args1 => (args2 => ... (argsn => E) ... ))`.
 
-+ This style of function definition and applications is called "currying", named after the logician Haskell Brooks Curry.
++ This style of function definition and application is called "currying", named after the logician Haskell Brooks Curry.
 
 + The type of `def sum(f: Int => Int)(a: Int, b: Int): Int = ...` is `(Int => Int) => (Int, Int) => Int`.
 
 + Function types associate to the right.
 
-  ````scala
-  // Int => Int => Int == Int => (Int => Int)
+  ````
+  Int => Int => Int == Int => (Int => Int)
   ````
 
 ### Lecture 2.3 -- Example: Finding Fixed Points
 
-+ A number is called a fixed point of a function `f` if `f(x) = x`.  For example, `2` is a fixed point of `x => 1 + (x / 2)^2` as `1 + (2 / 2)^2` is `2`.
++ A number is called a fixed point of a function `f` if `f(x) = x`.  For example, `2` is a fixed point of `x => 1 + (x / 2)^2`, since `1 + (2 / 2)^2` is `2`.
 
-+ For some functions `f`, we can locate fixed points by starting with an initial estimate `x` (e.g., `1`) and then repeatedly applying `f` to it until the results do not vary anymore. This works for the previously mentioned function.
++ For some functions `f`, we can locate fixed points by starting with an initial estimate `x`, e.g., `1`, and then repeatedly applying `f` to it until the results do not vary anymore. This works for the previously mentioned function.
 
   ````
   x, f(x), f(f(x)), ...
@@ -128,7 +128,7 @@
     fixedPoint(y => x / y)(1.0)
   ````
 
-  Unfortunately, no. When adding `println(next)` after the line `val next = // ... ` in the body of the `iterate` function, `sqrt(2)` prints :
+  Unfortunately, no. When adding `println(next)` after the line `val next = ... ` in the body of the `iterate` function, `sqrt(2)` prints :
 
   ````
   2.0
@@ -139,7 +139,7 @@
 
   + This can easily be reproduced using pen and paper.
 
-+ These oscillation can be avoided by averaging successive values:
++ This oscillation can be avoided by averaging successive values:
 
   ````scala
   def sqrt(x: Double) =
@@ -172,10 +172,10 @@
 
 ### Lecture 2.4 -- Scala Syntax Summary
 
-+ In the following, the context-free syntax of the language elements seen so far are given in Extended Backus-Naur form (EBNF), where
++ In the following, the context-free syntax of the language elements seen so far are given in Extended Backus-Naur Form (EBNF), where
 
   + `|` denotes an alternative,
-  + `[...]` and option (0 or 1),
+  + `[...]` an option (0 or 1),
   + `{...}` a repetition (0 or more).
 
 + Types:
@@ -199,11 +199,12 @@
 
   ````
   Expr         = InfixExpr | FunctionExpr
-               | if '(' Expr ')' Expr else
+               | if '(' Expr ')' Expr else Expr
   InfixExpr    = PrefixExpr | InfixExpr Operator InfixExpr
   Operator     = ident
   PrefixExpr   = ['+', '-', '!', '~'] SimpleExpr
-  SimpleExpr   = ident | literal | SimpleExpr '.' ident | Block
+  SimpleExpr   = ident | literal | SimpleExpr '.' ident
+               | Block
   FunctionExpr = Bindings '=>' Expr
   Bindings     = ident [':' SimpleType]
                | '(' [Binding {',' Binding}] ')'
@@ -255,15 +256,13 @@
   x.numer
   ````
 
-+ In a first approach, arithmetic functions implementing standard rules are implemented as
-
-  top-level functions that take and return `Rational`s, e.g.:
++ In a first approach, arithmetic functions implementing standard rules are implemented as top-level functions that take and return `Rational`s, e.g.:
 
   ````scala
   def addRational(r: Rational, s: Rational): Rational = // ...
   ````
 
-+ Then, the functions operating on the data abstraction are packaged in the abstraction itself -- as methods:
++ Then, the functions operating on the data abstraction are packaged in the abstraction itself, as methods:
 
   ````scala
   class Rational(x: Int, y: Int) {
@@ -337,7 +336,7 @@
 
 + The ability to choose from different implementations without affecting clients is called data abstraction.
 
-+ Inside a class, there is the self reference `this`, which represents the object on which a method is executed. A simple name `x`, referring to a class member, is an abbreviation of `x`.  `this` is used to implement the member functions `less` and `max` on the function `Rational`.
++ Inside a class, there is the self reference `this`, which represents the object on which a method is executed. A simple name `x`, referring to a class member, is an abbreviation of `this.x`.  `this` is used to implement the member functions `less` and `max` on the function `Rational`.
 
   ````scala
   class Rational(x: Int, y: Int) {
@@ -364,7 +363,7 @@
   + `require` is used to enforce a requirement on the function caller.
   + `assert` is used to check the code of the function itself.
 
-+ Scala introduces the primary constructor of the class implicitly. It takes the parameters of the class (`class Rational(x: Int, y: Int)`) and executes the statements in the class body, e.g., `require(y > 0, ”denominator must be positive”)`.
++ Scala introduces the primary constructor of the class implicitly. It takes the parameters of the class, e.g., `class Rational(x: Int, y: Int)` and executes the statements in the class body, e.g., `require(y > 0, ”denominator must be positive”)`.
 
 + Auxiliary constructors may be declared. They are called `this`.
 
@@ -379,7 +378,7 @@
 
 ### Lecture 2.7 -- Evaluation and Operators
 
-+  The previously introduced model of evaluation based on the term of rewriting, the so-called substitution model can be extended to model classes and objects. Consider the following class definition:
++  The previously introduced model of evaluation based on term rewriting, the so-called substitution model, can be extended to model classes and objects. Consider the following class definition:
 
   ````scala
   // The list of function parameters is optional.
@@ -424,14 +423,14 @@
   =  true
   `````
 
-+ With integers, we can write `x + y`, however, with `Rational`s we must do `r.add(s)`. In Scala, we can eliminate using
++ With integers, we can write `x + y`, however, with `Rational`s we must write `r.add(s)`. In Scala, we can solve this using:
 
   1. Infix notation
   2. Relaxed identifiers
 
 + Using infix notation, we can write `r add s` instead of `r.add(s)`. Any method with one parameter can be used like an infix operator.
 
-+ In Scala, an identifier are not confined to being alphanumeric. Instead, they can be
++ In Scala, identifiers are not confined to being alphanumeric. Instead, they can be:
 
   + Alphanumeric: Starting with a letter, followed by a sequence of letters or numbers. (`_` counts as a letter in this definition.)
   + Symbolic: Starting with an operator symbol, e.g., `+` or `-`, followed by other operator symbols.
