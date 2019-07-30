@@ -1,8 +1,16 @@
-# Notes on "Functional Programming Principles in Scala"
+# progfun1-course-notes
 
-## Week 3 -- Data and Abstraction
+**Week 3 - Data and Abstraction**
 
-### Lecture 3.1 -- Class Hierarchies
+---
+
+* [Lecture 3.1 - Class Hierarchies](#lecture-31---class-hierarchies)
+* [Lecture 3.2 - How Classes are Organized](#lecture-32---how-classes-are-organized)
+* [Lecture 3.3 - Polymorphism](#lecture-33---polymorphism)
+
+---
+
+## Lecture 3.1 - Class Hierarchies
 
 + Abstract classes contain members that are yet to be implemented. Accordingly, they cannot be instantiated. `IntSet` is an example of an abstract class:
 
@@ -131,7 +139,7 @@
 
 + Can we implement objects is terms of higher-order functions. I'll delegate this question to the following blog post, which argues that objects and closures are equivalent: http://c2.com/cgi/wiki?ClosuresAndObjectsAreEquivalent
 
-### Lecture 3.2 -- How Classes are Organized
+## Lecture 3.2 - How Classes are Organized
 
 +  Classes and objects are organized in packages. To do so, a package clause can be placed at the top of a source file.
 
@@ -197,7 +205,7 @@
 
   + The type of  `if (true) 1 else false` is `AnyVal`, as `1` is an `Int`, `false` is a `Boolean`, and `AnyVal` happens to be closest to the two.
 
-### Lecture 3.3 -- Polymorphism
+## Lecture 3.3 - Polymorphism
 
 + The immutable linked list is a fundamental data structure in many functional programming languages. Such a list is either a `Nil` or a `Cons`. `Nil` represents an empty list, whereas `Cons` holds an element, `head`, as well as a pointer to the rest of the list, `tail`.
 
