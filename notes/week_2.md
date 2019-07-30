@@ -1,8 +1,20 @@
-# Notes on "Functional Programming Principles in Scala"
+# progfun1-course-notes
 
-## Week 2 -- Higher-Order Functions 
+**Week 2 - Higher-Order Functions**
 
-### Lecture 2.1 -- Higher-Order Functions
+---
+
+* [Lecture 2.1 - Higher-Order Functions](#lecture-21---higher-order-functions)
+* [Lecture 2.2 - Currying](#lecture-22---currying)
+* [Lecture 2.3 - Example: Finding Fixed Points](#lecture-23---example-finding-fixed-points)
+* [Lecture 2.4 - Scala Syntax Summary](#lecture-24---scala-syntax-summary)
+* [Lecture 2.5 - Functions and Data](#lecture-25---functions-and-data)
+* [Lecture 2.6 - More Fun with Rationals](#lecture-26---more-fun-with-rationals)
+* [Lecture 2.7 - Evaluation and Operators](#lecture-27---evaluation-and-operators)
+
+---
+
+## Lecture 2.1 - Higher-Order Functions
 
 + Functional programming languages treat functions as "first-class values". This means that they can be received as arguments and returned as results. "Higher-order functions" are functions that do just that.
 
@@ -41,7 +53,7 @@
   def sumCubes(a: Int, b: Int) = sum(x => x * x * x, a, b)
   ````
 
-### Lecture 2.2 -- Currying
+## Lecture 2.2 - Currying
 
 + Note that above, `sumInts` and `sumCubes` simply pass `a` and `b` through. We can do better:
 
@@ -88,7 +100,7 @@
   Int => Int => Int == Int => (Int => Int)
   ````
 
-### Lecture 2.3 -- Example: Finding Fixed Points
+## Lecture 2.3 - Example: Finding Fixed Points
 
 + A number is called a fixed point of a function `f` if `f(x) = x`.  For example, `2` is a fixed point of `x => 1 + (x / 2)^2`, since `1 + (2 / 2)^2` is `2`.
 
@@ -170,7 +182,7 @@
     fixedPoint(averageDamp(y => x / y))(1.0)
   ````
 
-### Lecture 2.4 -- Scala Syntax Summary
+## Lecture 2.4 - Scala Syntax Summary
 
 + In the following, the context-free syntax of the language elements seen so far are given in Extended Backus-Naur Form (EBNF), where
 
@@ -243,7 +255,7 @@
   + A call-by-value parameter, e.g., `(x: Int)`
   + A call-by-name parameter, e.g., `(y: => Double)`
 
-### Lecture 2.5 -- Functions and Data
+## Lecture 2.5 - Functions and Data
 
 + In this section, we design a package for doing rational arithmetic. A rational number `x / y` is represented by its numerator `x` and its denominator `y` (both integers).
 
@@ -293,7 +305,7 @@
   println(x.sub(y).sub(z)) // -79/42
   ````
 
-### Lecture 2.6 -- More Fun with Rationals
+## Lecture 2.6 - More Fun with Rationals
 
 + In the previous lecture, rationals have not always been represented in their simplest form. They can be reduced to their smallest numerator and denominator by dividing both with their greatest common divisor.
 
@@ -376,7 +388,7 @@
 
 + It would be a bad idea if we altered `Rational` so that numbers are kept unsimplified until they are printed, i.e., if we moved the simplification inside the `toString` method. Why? We are dealing with integers here, and we might exceed the maximal number.
 
-### Lecture 2.7 -- Evaluation and Operators
+## Lecture 2.7 - Evaluation and Operators
 
 +  The previously introduced model of evaluation based on term rewriting, the so-called substitution model, can be extended to model classes and objects. Consider the following class definition:
 
