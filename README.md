@@ -14,11 +14,16 @@ Notes on and source code from the Coursera course "Functional Programming Princi
 
 ---
 
-1. [Progress](#1-progress) 
+1. [Overview](#1-overview) 
+2. [Progress](#2-progress) 
 
 ---
 
-## 1. Progress
+## 1. Overview
+
+These are my notes on the Coursera course "Functional Programming Principles in Scala" by Martin Odersky.
+
+## 2. Progress
 
 |  Done?             | Name                                          | Week    |
 |:------------------:|-----------------------------------------------|---------|
