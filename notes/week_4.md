@@ -1,8 +1,20 @@
-# Notes on "Functional Programming Principles in Scala"
+# progfun1-course-notes
 
-## Week 4 -- Types and Pattern Matching
+**Week 4 - Types and Pattern Matching**
 
-### Lecture 4.1 -- Objects Everywhere
+---
+
+* [Lecture 4.1 - Objects Everywhere](#lecture-41---objects-everywhere)
+* [Lecture 4.2 - Functions as Objects](#lecture-42---functions-as-objects)
+* [Lecture 4.3 - Subtyping and Generics](#lecture-43---subtyping-and-generics)
+* [Lecture 4.4 - Variance](#lecture-44---variance)
+* [Lecture 4.5 - Decomposition](#lecture-45---decomposition)
+* [Lecture 4.6 - Pattern Matching](#lecture-46---pattern-matching)
+* [Lecture 4.7 - Lists](#lecture-47---lists)
+
+---
+
+## Lecture 4.1 - Objects Everywhere
 
 + In a pure object-oriented programming language, each value is an object. If this language is based on classes, the type of each value, i.e., object, would be a class.
 
@@ -71,7 +83,7 @@
   }
   ````
 
-### Lecture 4.2 -- Functions as Objects
+## Lecture 4.2 - Functions as Objects
 
 + In Scala, function values are objects. `A => B` is just a shorthand for `scala.Function1[A, B]`, which is defined similar to what I defined at the end of lecture 3.2. To represent functions with two parameters, there is `Function2`, to represent those with three parameters, there is `Function3`, and so on.
 
@@ -106,7 +118,7 @@
   }
   ````
 
-### Lecture 4.3 -- Subtyping and Generics
+## Lecture 4.3 - Subtyping and Generics
 
 + We have already covered two forms of polymorphism, i.e., subtyping, which originated in object-oriented programming, and generics, which originated in functional programming.
 
@@ -167,7 +179,7 @@
 
     How would this translate to the problem described above? Well, `NonEmpty[]` should not be a subtype of `IntSet[]`, because one can put `Empty` instances into `IntSet[]` but not into `NonEmpty[]`
 
-### Lecture 4.4 -- Variance
+## Lecture 4.4 - Variance
 
 + In this lecture, we are going to cover the concept of variance, i.e., how subtyping relates to genericity.
 
@@ -289,7 +301,7 @@
 
   Thus, the return type of the function is `List[IntSet]`.
 
-### Lecture 4.5 -- Decomposition
+## Lecture 4.5 - Decomposition
 
 + Decomposition is an important problem in programming. Suppose we have a hierarchy of classes and want to build tree-like data structures from the instances of these classes. How would we find out what kinds of elements are in this tree?
 
@@ -387,7 +399,7 @@
 
   This is a non-local simplification. It cannot be encapsulated into a method of one object. In order to inspect our tree-like data structure of `Expr` instances, we need to go back to square one, using classification and accessor methods.
 
-### Lecture 4.6 -- Pattern Matching
+## Lecture 4.6 - Pattern Matching
 
 + Recap
 
@@ -528,7 +540,7 @@
   show(Prod(Sum(Number(2), Var("x")), Var("y"))) // (2 + x) * y
   ````
 
-### Lecture 4.7 -- Lists
+### Lecture 4.7 - Lists
 
 + As mentioned before, lists are a fundamental data structure in functional programming.
 
