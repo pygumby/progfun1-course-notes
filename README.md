@@ -30,4 +30,4 @@ Notes on and source code from the Coursera course "Functional Programming Princi
 | :x:                | Collections                                   | Week 6  |
 
 :point_right: I have completed weeks 5 and 6 on Coursera.
-Due to a lack of time, however, I have not been taking presentable notes.
+Due to a lack of time, however, I have not been taking notes.
