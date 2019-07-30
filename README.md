@@ -2,10 +2,6 @@
 
 Notes on and source code from the Coursera course "Functional Programming Principles in Scala" by Martin Odersky
 
-<a href="https://www.coursera.org/account/accomplishments/records/EEPS5QERHXNC">
-  <img alt="Certificate" width=33% height=33% src="certificate/epfl_functional_programming_principles_in_scala_certificate.png" />
-</a>
-
 ---
 
 * The contents of this repository are based on the Coursera course [Functional Programming Principles in Scala](https://de.coursera.org/learn/progfun1) by Martin Odersky ([@odersky](https://github.com/odersky), [lampwww.epfl.ch/~odersky](https://lampwww.epfl.ch/~odersky)).
@@ -14,16 +10,12 @@ Notes on and source code from the Coursera course "Functional Programming Princi
 
 ---
 
-1. [Overview](#1-overview) 
-2. [Progress](#2-progress) 
+1. [Progress](#1-progress) 
+2. [Certificate](#2-certificate)
 
 ---
 
-## 1. Overview
-
-These are my notes on the Coursera course "Functional Programming Principles in Scala" by Martin Odersky.
-
-## 2. Progress
+## 1. Progress
 
 |  Done?             | Name                                          | Week    |
 |:------------------:|-----------------------------------------------|---------|
@@ -36,3 +28,9 @@ These are my notes on the Coursera course "Functional Programming Principles in 
 
 :point_right: I have completed weeks 5 and 6 on Coursera.
 Due to a lack of time, however, I have not been taking notes.
+
+## 2. Certificate
+
+<a href="https://www.coursera.org/account/accomplishments/records/EEPS5QERHXNC">
+  <img alt="Certificate" width=50% height=50% src="certificate/epfl_functional_programming_principles_in_scala_certificate.png" />
+</a>
