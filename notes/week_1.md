@@ -1,8 +1,20 @@
-# Notes on "Functional Programming Principles in Scala"
+# progfun1-course-notes
 
-## Week 1 -- Functions & Evaluation
+**Week 1 - Functions & Evaluation**
 
-### Lecture 1.1 -- Programming Paradigms
+---
+
+* [Lecture 1.1 - Programming Paradigms](#lecture-11---programming-paradigms)
+* [Lecture 1.2 - Elements of Programming](#lecture-12---elements-of-programming)
+* [Lecture 1.3 - Evaluation Strategies and Termination](#lecture-13---evaluation-strategies-and-termination)
+* [Lecture 1.4 - Conditionals and Value Definitions](#lecture-14---conditionals-and-value-definitions)
+* [Lecture 1.5 - Example: Square Roots with Newton's Method](#lecture-15---example-square-roots-with-newtons-method)
+* [Lecture 1.6 - Blocks and Lexical Scope](#lecture-16---blocks-and-lexical-scope)
+* [Lecture 1.7 - Tail Recursion](#lecture-17---tail-recursion)
+
+---
+
+## Lecture 1.1 - Programming Paradigms
 
 + Scala is a great tool to learn functional programming and later integrate it with more traditional object-oriented programming.
 
@@ -31,7 +43,7 @@
   + There is better modularity.
   + It's good for exploiting parallelism.
 
-### Lecture 1.2 -- Elements of Programming
+## Lecture 1.2 - Elements of Programming
 
 + Every non-trivial language provides primitive expressions, ways to combine those into larger expressions, and ways to abstract expressions, i.e., to name them.
 
@@ -65,7 +77,7 @@
 
 + Call-by-value's advantage is that each argument is only evaluated once, call-by-name's advantage is that unused arguments are not evaluated at all.
 
-### Lecture 1.3 -- Evaluation Strategies and Termination
+## Lecture 1.3 - Evaluation Strategies and Termination
 
 + If the call-by-value evaluation of an expression `e` terminates, then the call-by-name evaluation of `e` terminates, too. This is not true in the other direction.
 
@@ -83,7 +95,7 @@
   constOne(1 + 2, loop) // Works
   ````
 
-### Lecture 1.4 -- Conditionals and Value Definitions
+## Lecture 1.4 - Conditionals and Value Definitions
 
 + Unlike Java, Scala's `if-then-else` is not a statement but an expression.
 
@@ -116,7 +128,7 @@
 
   An implementation of `or` is omitted for brevity.
 
-### Lecture 1.5 -- Example: Square Roots with Newton's Method
+## Lecture 1.5 - Example: Square Roots with Newton's Method
 
 + In the following, note that `sqrtIter` is recursive, its right-hand side calls itself. Recursive functions need an explicit return type in Scala.
 
@@ -139,7 +151,7 @@
    sqrtIter(1.0, x)
   ````
 
-### Lecture 1.6 -- Blocks and Lexical Scope
+## Lecture 1.6 - Blocks and Lexical Scope
 
 + We want to split up a task into many small functions while avoiding "namespace pollution". With regards to the previous example, we can do so by putting the auxiliary functions inside of `sqrt`.
 
@@ -194,7 +206,7 @@
 
 + In Scala, semicolons are optional in most cases. However, multiple statements on one line must be separated by semicolons. Multi-line expressions containing infix operators should either be put into parentheses or intermediate lines should end with the operator, signaling the compiler that the expression is not yet finished.
 
-### Lecture 1.7 -- Tail Recursion
+## Lecture 1.7 - Tail Recursion
 
 + Consider the following definition of Euclid's algorithm `gcd` to compute the greatest common divisor of two numbers as well as the evaluation of `gcd(14, 21)`:
 
