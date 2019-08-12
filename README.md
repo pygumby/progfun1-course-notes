@@ -1,6 +1,6 @@
 # progfun-1-course-notes
 
-Notes on and source code from the Coursera course "Functional Programming Principles in Scala" by Martin Odersky
+**Notes on and source code from the Coursera course "Functional Programming Principles in Scala" by Martin Odersky**
 
 ---
 
