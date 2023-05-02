@@ -22,14 +22,14 @@
 
 ## 1. Progress
 
-|  Done?                              | Name                                          | Week    |
-|:-----------------------------------:|-----------------------------------------------|---------|
-| :white_check_mark:                  | [Functions & Evaluation](notes/week_1.md)     | Week 1  |
-| :white_check_mark:                  | [Higher-Order Functions](notes/week_2.md)     | Week 2  |
-| :white_check_mark:                  | [Data and Abstraction](notes/week_3.md)       | Week 3  |
-| :white_check_mark:                  | [Types and Pattern Matching](notes/week_4.md) | Week 4  |
-| :white_check_mark: (no note-taking) | Lists                                         | Week 5  |
-| :white_check_mark: (no note-taking) | Collections                                   | Week 6  |
+|  Done?             | Name                                          | Week    |
+|--------------------|-----------------------------------------------|---------|
+| :white_check_mark: | [Functions & Evaluation](notes/week_1.md)     | Week 1  |
+| :white_check_mark: | [Higher-Order Functions](notes/week_2.md)     | Week 2  |
+| :white_check_mark: | [Data and Abstraction](notes/week_3.md)       | Week 3  |
+| :white_check_mark: | [Types and Pattern Matching](notes/week_4.md) | Week 4  |
+| :white_check_mark: | Lists (no note-taking)                        | Week 5  |
+| :white_check_mark: | Collections (no note-taking)                  | Week 6  |
 
 :point_right: I have completed weeks 5 and 6 on Coursera.
 Due to a lack of time, however, I have not been taking notes.
